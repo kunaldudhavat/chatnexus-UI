@@ -1,3 +1,4 @@
+// api.js
 import axios from 'axios';
 
 // Base URL for the backend API
@@ -40,6 +41,7 @@ export const authApi = {
 export const userApi = {
     getProfile: () => api.get('/api/users/profile'),
     updateProfile: (data) => api.put('/api/users/update', data),
+    searchUsers: (query) => api.get(`/api/users/${query}`),  // Ensure this is correct
 };
 
 // Chat API calls
@@ -52,7 +54,7 @@ export const chatApi = {
 // Message API calls
 export const messageApi = {
     getMessages: (chatId) => api.get(`/api/messages/${chatId}`),
-    sendMessage: (data) => api.post('/api/messages/create', data),  // Corrected this line
+    sendMessage: (data) => api.post('/api/messages/create', data),
 };
 
 export default api;

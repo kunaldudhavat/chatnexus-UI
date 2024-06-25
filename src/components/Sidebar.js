@@ -6,12 +6,15 @@ import { Menu } from '@headlessui/react';
 import { ResizableBox } from 'react-resizable';
 import Profile from './Profile';
 import { fetchChats } from '../actions/chatActions';
-import { logout } from '../actions/authActions'; // Import logout action
+import { userApi } from '../api/api';
 import 'react-resizable/css/styles.css';
-import { HiChat } from 'react-icons/hi';
+import { HiChat } from "react-icons/hi";
+import { logout } from '../actions/authActions';
 
 const Sidebar = () => {
     const [showProfile, setShowProfile] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
     const dispatch = useDispatch();
     const chats = useSelector((state) => state.chat.chats);
 
@@ -23,12 +26,32 @@ const Sidebar = () => {
         dispatch(logout());
     };
 
+    const handleSearchChange = async (e) => {
+        const query = e.target.value;
+        console.log('Search query:', query); // Debug log
+        setSearchQuery(query);
+
+        if (query.length > 0) {
+            try {
+                const response = await userApi.searchUsers(query);
+                console.log('Search results:', response.data); // Debug log
+                setSearchResults(response.data);
+            } catch (error) {
+                console.error('Error searching users:', error);
+            }
+        } else {
+            setSearchResults([]);
+        }
+    };
+
+
+
     return (
         <ResizableBox
-            width={400} // Adjusted width
+            width={400}
             height={Infinity}
-            minConstraints={[300, Infinity]} // Adjusted minimum width
-            maxConstraints={[600, Infinity]} // Adjusted maximum width
+            minConstraints={[300, Infinity]}
+            maxConstraints={[600, Infinity]}
             axis="x"
             resizeHandles={['e']}
             className="bg-gray-900 text-white flex flex-col"
@@ -76,7 +99,7 @@ const Sidebar = () => {
                                     <Menu.Item>
                                         {({ active }) => (
                                             <button
-                                                onClick={handleLogout} // Add the logout handler here
+                                                onClick={handleLogout}
                                                 className={`${
                                                     active ? 'bg-gray-700 text-white' : 'text-gray-300'
                                                 } group flex rounded-md items-center w-full px-2 py-2 text-sm`}
@@ -101,24 +124,42 @@ const Sidebar = () => {
                                     type="text"
                                     placeholder="Search or start new chat"
                                     className="w-full bg-gray-800 rounded-full p-2 pl-10 text-white focus:outline-none"
+                                    value={searchQuery}
+                                    onChange={handleSearchChange}
                                 />
                             </div>
                         </div>
                         <div className="flex-1 overflow-y-auto">
-                            {chats.map((chat) => (
-                                <div key={chat.id} className="p-4 flex items-center justify-between hover:bg-gray-700 cursor-pointer">
-                                    <div className="flex items-center space-x-3">
-                                        <div className="bg-gray-800 rounded-full h-10 w-10 flex items-center justify-center">
-                                            <FiUser className="text-2xl text-gray-400" />
-                                        </div>
-                                        <div>
-                                            <h3 className="text-lg font-semibold">{chat.name}</h3>
-                                            <p className="text-sm text-gray-400">{chat.lastMessage}</p>
+                            {searchResults.length > 0 ? (
+                                searchResults.map((user) => (
+                                    <div key={user.id} className="p-4 flex items-center justify-between hover:bg-gray-700 cursor-pointer">
+                                        <div className="flex items-center space-x-3">
+                                            <div className="bg-gray-800 rounded-full h-10 w-10 flex items-center justify-center">
+                                                <FiUser className="text-2xl text-gray-400" />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-lg font-semibold">{user.name}</h3>
+                                                <p className="text-sm text-gray-400">{user.email}</p>
+                                            </div>
                                         </div>
                                     </div>
-                                    <span className="text-sm text-gray-400">{new Date(chat.updatedAt).toLocaleTimeString()}</span>
-                                </div>
-                            ))}
+                                ))
+                            ) : (
+                                chats.map((chat) => (
+                                    <div key={chat.id} className="p-4 flex items-center justify-between hover:bg-gray-700 cursor-pointer">
+                                        <div className="flex items-center space-x-3">
+                                            <div className="bg-gray-800 rounded-full h-10 w-10 flex items-center justify-center">
+                                                <FiUser className="text-2xl text-gray-400" />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-lg font-semibold">{chat.name}</h3>
+                                                <p className="text-sm text-gray-400">{chat.lastMessage}</p>
+                                            </div>
+                                        </div>
+                                        <span className="text-sm text-gray-400">{new Date(chat.updatedAt).toLocaleTimeString()}</span>
+                                    </div>
+                                ))
+                            )}
                         </div>
                     </>
                 )}

@@ -1,87 +1,167 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
-import { HiChat } from 'react-icons/hi';
-import { authApi } from '../api/api';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { BiBot, BiPlus, BiDotsVerticalRounded, BiSearch } from 'react-icons/bi';
+import { FiUser } from 'react-icons/fi';
+import { Menu } from '@headlessui/react';
+import { ResizableBox } from 'react-resizable';
+import Profile from './Profile';
+import { fetchChats } from '../actions/chatActions';
+import { userApi } from '../api/api';
+import 'react-resizable/css/styles.css';
+import { HiChat } from "react-icons/hi";
+import { logout } from '../actions/authActions';
 
-const SignIn = () => {
-    const [formData, setFormData] = useState({
-        email: '',
-        password: ''
-    });
-    const [errorMessage, setErrorMessage] = useState('');
+const Sidebar = () => {
+    const [showProfile, setShowProfile] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
     const dispatch = useDispatch();
-    const navigate = useNavigate();
+    const chats = useSelector((state) => state.chat.chats);
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
+    useEffect(() => {
+        dispatch(fetchChats());
+    }, [dispatch]);
+
+    const handleLogout = () => {
+        dispatch(logout());
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            const response = await authApi.signIn(formData);
-            const { jwt } = response.data;
-            if (jwt) {
-                localStorage.setItem('token', jwt);
-                dispatch({ type: 'SIGN_IN_SUCCESS' });
-                navigate('/');
-            } else {
-                throw new Error('Token not found in response');
+    const handleSearchChange = async (e) => {
+        const query = e.target.value;
+        setSearchQuery(query);
+
+        if (query.length > 0) {
+            try {
+                const response = await userApi.searchUsers(query);
+                setSearchResults(response.data);
+            } catch (error) {
+                console.error('Error searching users:', error);
             }
-        } catch (error) {
-            setErrorMessage(error.response?.data?.message || 'Sign-in failed');
+        } else {
+            setSearchResults([]);
         }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-900">
-            <div className="bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-md">
-                <div className="flex items-center justify-center mb-6">
-                    <HiChat className="text-3xl text-white mr-2" />
-                    <h1 className="text-3xl font-bold text-white">ChatNexus</h1>
+        <ResizableBox
+            width={400}
+            height={Infinity}
+            minConstraints={[300, Infinity]}
+            maxConstraints={[600, Infinity]}
+            axis="x"
+            resizeHandles={['e']}
+            className="bg-gray-900 text-white flex flex-col"
+        >
+            <div className="flex flex-col h-full">
+                <div className="flex items-center justify-between p-4 h-16 border-b border-gray-700">
+                    <div className="flex items-center space-x-2">
+                        <HiChat className="text-3xl" />
+                        <h2 className="text-xl font-bold">ChatNexus</h2>
+                    </div>
+                    <div className="flex space-x-3">
+                        <BiBot className="text-2xl cursor-pointer" />
+                        <BiPlus className="text-2xl cursor-pointer" />
+                        <Menu as="div" className="relative inline-block text-left">
+                            <div>
+                                <Menu.Button className="inline-flex justify-center w-full text-sm font-medium text-white">
+                                    <BiDotsVerticalRounded className="text-2xl cursor-pointer" />
+                                </Menu.Button>
+                            </div>
+                            <Menu.Items className="absolute right-0 w-56 mt-2 origin-top-right bg-gray-800 border border-gray-700 divide-y divide-gray-700 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
+                                <div className="px-1 py-1">
+                                    <Menu.Item>
+                                        {({ active }) => (
+                                            <button
+                                                onClick={() => setShowProfile(true)}
+                                                className={`${
+                                                    active ? 'bg-gray-700 text-white' : 'text-gray-300'
+                                                } group flex rounded-md items-center w-full px-2 py-2 text-sm`}
+                                            >
+                                                Profile
+                                            </button>
+                                        )}
+                                    </Menu.Item>
+                                    <Menu.Item>
+                                        {({ active }) => (
+                                            <button
+                                                className={`${
+                                                    active ? 'bg-gray-700 text-white' : 'text-gray-300'
+                                                } group flex rounded-md items-center w-full px-2 py-2 text-sm`}
+                                            >
+                                                Create a Group
+                                            </button>
+                                        )}
+                                    </Menu.Item>
+                                    <Menu.Item>
+                                        {({ active }) => (
+                                            <button
+                                                onClick={handleLogout}
+                                                className={`${
+                                                    active ? 'bg-gray-700 text-white' : 'text-gray-300'
+                                                } group flex rounded-md items-center w-full px-2 py-2 text-sm`}
+                                            >
+                                                Log out
+                                            </button>
+                                        )}
+                                    </Menu.Item>
+                                </div>
+                            </Menu.Items>
+                        </Menu>
+                    </div>
                 </div>
-                <h2 className="text-2xl font-bold text-center text-white mb-6">Sign In</h2>
-                <form onSubmit={handleSubmit}>
-                    <div className="mb-4">
-                        <label className="block text-gray-400 mb-1">Email</label>
-                        <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            className="w-full p-2 bg-gray-700 rounded-lg text-white focus:outline-none"
-                            placeholder="Enter your email"
-                            required
-                        />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-400 mb-1">Password</label>
-                        <input
-                            type="password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            className="w-full p-2 bg-gray-700 rounded-lg text-white focus:outline-none"
-                            placeholder="Enter your password"
-                            required
-                        />
-                    </div>
-                    <button type="submit" className="w-full bg-blue-500 p-2 rounded-lg text-white hover:bg-blue-600">
-                        Sign In
-                    </button>
-                    {errorMessage && <p className="text-red-500 text-sm mt-2">{errorMessage}</p>}
-                </form>
-                <p className="text-gray-400 text-sm mt-4 text-center">
-                    Don't have an account? <Link to="/signup" className="text-blue-500 hover:text-blue-300">Sign up</Link>
-                </p>
-                <p className="text-gray-400 text-sm mt-2 text-center">
-                    <Link to="/forgot-password" className="text-blue-500 hover:text-blue-300">Forgot Password?</Link>
-                </p>
+                {showProfile ? (
+                    <Profile closeProfile={() => setShowProfile(false)} />
+                ) : (
+                    <>
+                        <div className="p-4 border-b border-gray-700">
+                            <div className="relative">
+                                <BiSearch className="absolute top-3 left-3 text-gray-400" />
+                                <input
+                                    type="text"
+                                    placeholder="Search or start new chat"
+                                    className="w-full bg-gray-800 rounded-full p-2 pl-10 text-white focus:outline-none"
+                                    value={searchQuery}
+                                    onChange={handleSearchChange}
+                                />
+                            </div>
+                        </div>
+                        <div className="flex-1 overflow-y-auto">
+                            {searchResults.length > 0 ? (
+                                searchResults.map((user) => (
+                                    <div key={user.id} className="p-4 flex items-center justify-between hover:bg-gray-700 cursor-pointer">
+                                        <div className="flex items-center space-x-3">
+                                            <div className="bg-gray-800 rounded-full h-10 w-10 flex items-center justify-center">
+                                                <FiUser className="text-2xl text-gray-400" />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-lg font-semibold">{user.name}</h3>
+                                                <p className="text-sm text-gray-400">{user.email}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                chats.map((chat) => (
+                                    <div key={chat.id} className="p-4 flex items-center justify-between hover:bg-gray-700 cursor-pointer">
+                                        <div className="flex items-center space-x-3">
+                                            <div className="bg-gray-800 rounded-full h-10 w-10 flex items-center justify-center">
+                                                <FiUser className="text-2xl text-gray-400" />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-lg font-semibold">{chat.name}</h3>
+                                                <p className="text-sm text-gray-400">{chat.lastMessage}</p>
+                                            </div>
+                                        </div>
+                                        <span className="text-sm text-gray-400">{new Date(chat.updatedAt).toLocaleTimeString()}</span>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </>
+                )}
             </div>
-        </div>
+        </ResizableBox>
     );
 };
 
-export default SignIn;
+export default Sidebar;
