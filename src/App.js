@@ -1,22 +1,40 @@
 import React from 'react';
-import Sidebar from './components/Sidebar';
-import ChatHeader from './components/ChatHeader';
-import ChatMessages from './components/ChatMessages';
-import MessageInput from './components/MessageInput';
-import './index.css';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import Signup from './components/Signup';
+import Signin from './components/Signin';
+import ForgotPasswordModal from './components/ForgotPasswordModal';
+import ResetPasswordModal from './components/ResetPasswordModal';
+import HomePage from './components/HomePage';
+import ProtectedRoute from './components/ProtectedRoute';
 
 const App = () => {
+    const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
+    console.log('App: isAuthenticated:', isAuthenticated); // Add this log
+
     return (
-        <div className="flex h-screen bg-gray-900">
-            <Sidebar />
-            <div className="border-l border-gray-700 flex flex-col flex-1">
-                <ChatHeader chatName="John Doe" status="Online" />
-                <ChatMessages />
-                <MessageInput />
-            </div>
-        </div>
+        <Router>
+            <Routes>
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/signin" element={<Signin />} />
+                <Route path="/forgot-password" element={<ForgotPasswordModal />} />
+                <Route path="/reset-password/:token" element={<ResetPasswordModal />} />
+                <Route
+                    path="/"
+                    element={
+                        <ProtectedRoute>
+                            <HomePage />
+                        </ProtectedRoute>
+                    }
+                />
+                {/* Redirect any unknown routes to signin if not authenticated */}
+                <Route
+                    path="*"
+                    element={isAuthenticated ? <Navigate to="/" /> : <Navigate to="/signin" />}
+                />
+            </Routes>
+        </Router>
     );
 };
 
 export default App;
-

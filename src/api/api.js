@@ -8,11 +8,6 @@ const getToken = () => {
     return localStorage.getItem('token');
 };
 
-// Function to set the JWT token in localStorage
-const setToken = (token) => {
-    localStorage.setItem('token', token);
-};
-
 // API service
 const api = axios.create({
     baseURL: API_URL,
@@ -57,7 +52,7 @@ export const chatApi = {
 // Message API calls
 export const messageApi = {
     getMessages: (chatId) => api.get(`/api/messages/${chatId}`),
-    sendMessage: (data) => api.post('/api/messages/create', data),
+    sendMessage: (data) => api.post('/api/messages/create', data),  // Corrected this line
 };
 
 export default api;

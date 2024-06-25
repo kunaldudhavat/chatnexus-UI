@@ -1,21 +1,34 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { BiBot, BiPlus, BiDotsVerticalRounded, BiSearch } from 'react-icons/bi';
 import { FiUser } from 'react-icons/fi';
 import { Menu } from '@headlessui/react';
 import { ResizableBox } from 'react-resizable';
 import Profile from './Profile';
+import { fetchChats } from '../actions/chatActions';
+import { logout } from '../actions/authActions'; // Import logout action
 import 'react-resizable/css/styles.css';
-import { HiChat } from "react-icons/hi";
+import { HiChat } from 'react-icons/hi';
 
 const Sidebar = () => {
     const [showProfile, setShowProfile] = useState(false);
+    const dispatch = useDispatch();
+    const chats = useSelector((state) => state.chat.chats);
+
+    useEffect(() => {
+        dispatch(fetchChats());
+    }, [dispatch]);
+
+    const handleLogout = () => {
+        dispatch(logout());
+    };
 
     return (
         <ResizableBox
-            width={400}
+            width={400} // Adjusted width
             height={Infinity}
-            minConstraints={[300, Infinity]}
-            maxConstraints={[600, Infinity]}
+            minConstraints={[300, Infinity]} // Adjusted minimum width
+            maxConstraints={[600, Infinity]} // Adjusted maximum width
             axis="x"
             resizeHandles={['e']}
             className="bg-gray-900 text-white flex flex-col"
@@ -63,6 +76,7 @@ const Sidebar = () => {
                                     <Menu.Item>
                                         {({ active }) => (
                                             <button
+                                                onClick={handleLogout} // Add the logout handler here
                                                 className={`${
                                                     active ? 'bg-gray-700 text-white' : 'text-gray-300'
                                                 } group flex rounded-md items-center w-full px-2 py-2 text-sm`}
@@ -91,42 +105,20 @@ const Sidebar = () => {
                             </div>
                         </div>
                         <div className="flex-1 overflow-y-auto">
-                            <div className="p-4 flex items-center justify-between hover:bg-gray-700 cursor-pointer">
-                                <div className="flex items-center space-x-3">
-                                    <div className="bg-gray-800 rounded-full h-10 w-10 flex items-center justify-center">
-                                        <FiUser className="text-2xl text-gray-400" />
+                            {chats.map((chat) => (
+                                <div key={chat.id} className="p-4 flex items-center justify-between hover:bg-gray-700 cursor-pointer">
+                                    <div className="flex items-center space-x-3">
+                                        <div className="bg-gray-800 rounded-full h-10 w-10 flex items-center justify-center">
+                                            <FiUser className="text-2xl text-gray-400" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-lg font-semibold">{chat.name}</h3>
+                                            <p className="text-sm text-gray-400">{chat.lastMessage}</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h3 className="text-lg font-semibold">John Doe</h3>
-                                        <p className="text-sm text-gray-400">Hey, how's it going?</p>
-                                    </div>
+                                    <span className="text-sm text-gray-400">{new Date(chat.updatedAt).toLocaleTimeString()}</span>
                                 </div>
-                                <span className="text-sm text-gray-400">2:34 PM</span>
-                            </div>
-                            <div className="p-4 flex items-center justify-between hover:bg-gray-700 cursor-pointer">
-                                <div className="flex items-center space-x-3">
-                                    <div className="bg-gray-800 rounded-full h-10 w-10 flex items-center justify-center">
-                                        <FiUser className="text-2xl text-gray-400" />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-lg font-semibold">Jane Smith</h3>
-                                        <p className="text-sm text-gray-400">Did you see the new update?</p>
-                                    </div>
-                                </div>
-                                <span className="text-sm text-gray-400">11:23 AM</span>
-                            </div>
-                            <div className="p-4 flex items-center justify-between hover:bg-gray-700 cursor-pointer">
-                                <div className="flex items-center space-x-3">
-                                    <div className="bg-gray-800 rounded-full h-10 w-10 flex items-center justify-center">
-                                        <FiUser className="text-2xl text-gray-400" />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-lg font-semibold">Michael Johnson</h3>
-                                        <p className="text-sm text-gray-400">Let's catch up this weekend!</p>
-                                    </div>
-                                </div>
-                                <span className="text-sm text-gray-400">Yesterday</span>
-                            </div>
+                            ))}
                         </div>
                     </>
                 )}
