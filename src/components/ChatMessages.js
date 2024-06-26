@@ -1,3 +1,4 @@
+// src/components/ChatMessages.js
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchMessages } from '../actions/messageActions';
@@ -14,11 +15,6 @@ const ChatMessages = () => {
         }
     }, [currentChat, dispatch]);
 
-    // Log messages to debug the structure
-    console.log('ChatMessages: messages:', messages);
-    console.log('ChatMessages: currentChat:', currentChat);
-    console.log('ChatMessages: currentUser:', currentUser);
-
     if (!currentChat) {
         return (
             <div className="flex-1 p-4 flex items-center justify-center bg-gray-900 text-white">
@@ -34,26 +30,19 @@ const ChatMessages = () => {
         <div className="flex-1 p-4 overflow-y-auto bg-gray-900">
             <div className="flex flex-col space-y-2">
                 {messages && messages.length > 0 ? (
-                    messages.map((message) => {
-                        console.log('Rendering message:', message);
-                        return (
-                            message && message.id && message.user && message.content && message.timestamp ? (
-                                <div
-                                    key={message.id}
-                                    className={`${
-                                        message.user.id === currentUser.id ? 'self-end bg-green-600' : 'self-start bg-gray-800'
-                                    } text-white p-3 rounded-lg max-w-xs`}
-                                >
-                                    <p>{message.content}</p>
-                                    <span className="text-xs text-gray-400 block mt-1">
-                                        {new Date(message.timestamp).toLocaleTimeString()}
-                                    </span>
-                                </div>
-                            ) : (
-                                <div key={message.id || Math.random()} className="text-center text-gray-400">Invalid message data</div>
-                            )
-                        );
-                    })
+                    messages.map((message) => (
+                        <div
+                            key={message.id}
+                            className={`${
+                                message.user.id === currentUser.id ? 'self-end bg-green-600' : 'self-start bg-gray-800'
+                            } text-white p-3 rounded-lg max-w-xs`}
+                        >
+                            <p>{message.content}</p>
+                            <span className="text-xs text-gray-400 block mt-1">
+                                {new Date(message.timestamp).toLocaleTimeString()}
+                            </span>
+                        </div>
+                    ))
                 ) : (
                     <div className="text-center text-gray-400">No messages yet</div>
                 )}

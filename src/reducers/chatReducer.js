@@ -1,3 +1,4 @@
+// src/reducers/chatReducer.js
 import { SET_CHATS, ADD_CHAT, SET_CURRENT_CHAT } from '../actions/chatActions';
 
 const initialState = {

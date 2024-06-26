@@ -1,3 +1,4 @@
+// src/components/Sidebar.js
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { BiBot, BiPlus, BiDotsVerticalRounded, BiSearch } from 'react-icons/bi';
@@ -5,9 +6,9 @@ import { FiUser } from 'react-icons/fi';
 import { Menu } from '@headlessui/react';
 import { ResizableBox } from 'react-resizable';
 import { HiChat } from "react-icons/hi";
-import { fetchChats, setCurrentChat, createChat } from '../actions/chatActions';
-import { logout } from '../actions/authActions'; // Import the logout action
-import { userApi } from '../api/api'; // Import the userApi
+import { fetchChats, createChat, setCurrentChat } from '../actions/chatActions';
+import { userApi } from '../api/api';
+import { logout } from '../actions/authActions';
 import Profile from './Profile';
 import 'react-resizable/css/styles.css';
 
@@ -17,13 +18,29 @@ const Sidebar = () => {
     const [searchResults, setSearchResults] = useState([]);
     const dispatch = useDispatch();
     const chats = useSelector((state) => state.chat.chats);
+    const currentUser = useSelector((state) => state.auth.user);
+    const currentChat = useSelector((state) => state.chat.currentChat);
 
     useEffect(() => {
         dispatch(fetchChats());
+
+        // Retrieve the stored chat ID from local storage
+        const storedChatId = localStorage.getItem('currentChatId');
+        if (storedChatId) {
+            dispatch(setCurrentChat(parseInt(storedChatId)));
+        }
     }, [dispatch]);
+
+    useEffect(() => {
+        // Store the current chat ID in local storage
+        if (currentChat) {
+            localStorage.setItem('currentChatId', currentChat.id);
+        }
+    }, [currentChat]);
 
     const handleLogout = () => {
         dispatch(logout());
+        localStorage.removeItem('currentChatId');
     };
 
     const handleSearchChange = async (e) => {
@@ -33,7 +50,8 @@ const Sidebar = () => {
         if (query.length > 0) {
             try {
                 const response = await userApi.searchUsers(query);
-                setSearchResults(response.data);
+                const filteredResults = response.data.filter(user => user.id !== currentUser.id);
+                setSearchResults(filteredResults);
             } catch (error) {
                 console.error('Error searching users:', error);
             }
@@ -43,11 +61,6 @@ const Sidebar = () => {
     };
 
     const handleUserClick = async (userId) => {
-        if (!userId) {
-            console.error('User ID is undefined');
-            return;
-        }
-
         try {
             const newChat = await dispatch(createChat(userId));
             dispatch(setCurrentChat(newChat.id));
@@ -59,12 +72,11 @@ const Sidebar = () => {
     };
 
     const handleChatClick = (chatId) => {
-        if (!chatId) {
-            console.error('Chat ID is undefined');
-            return;
-        }
         dispatch(setCurrentChat(chatId));
     };
+
+    // Debugging logs
+    console.log('Sidebar: chats:', chats);
 
     return (
         <ResizableBox
@@ -154,7 +166,11 @@ const Sidebar = () => {
                                 searchResults.map((user) => (
                                     <div
                                         key={user.id}
-                                        className="p-4 flex items-center justify-between hover:bg-gray-700 cursor-pointer"
+                                        className={`p-4 flex items-center justify-between cursor-pointer ${
+                                            currentChat && currentChat.users.some(u => u.id === user.id)
+                                                ? 'bg-gray-700'
+                                                : 'hover:bg-gray-700'
+                                        }`}
                                         onClick={() => handleUserClick(user.id)}
                                     >
                                         <div className="flex items-center space-x-3">
@@ -169,28 +185,31 @@ const Sidebar = () => {
                                     </div>
                                 ))
                             ) : chats.length > 0 ? (
-                                chats.map((chat) => (
-                                    <div
-                                        key={chat.id}
-                                        className="p-4 flex items-center justify-between hover:bg-gray-700 cursor-pointer"
-                                        onClick={() => handleChatClick(chat.id)}
-                                    >
-                                        <div className="flex items-center space-x-3">
-                                            <div className="bg-gray-800 rounded-full h-10 w-10 flex items-center justify-center">
-                                                <FiUser className="text-2xl text-gray-400" />
-                                            </div>
-                                            <div>
-                                                <h3 className="text-lg font-semibold">{chat.isGroupChat ? chat.chatName : chat.users[0].name}</h3>
-                                                <p className="text-sm text-gray-400">{chat.latestMessage ? chat.latestMessage.content : 'No messages yet'}</p>
+                                chats
+                                    .filter(chat => chat.users.some(user => user.id !== currentUser.id)) // Filter out chats with only the current user
+                                    .map((chat) => (
+                                        <div
+                                            key={chat.id}
+                                            className={`p-4 flex items-center justify-between cursor-pointer ${
+                                                currentChat && currentChat.id === chat.id ? 'bg-gray-700' : 'hover:bg-gray-700'
+                                            }`}
+                                            onClick={() => handleChatClick(chat.id)}
+                                        >
+                                            <div className="flex items-center space-x-3">
+                                                <div className="bg-gray-800 rounded-full h-10 w-10 flex items-center justify-center">
+                                                    <FiUser className="text-2xl text-gray-400" />
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-lg font-semibold">
+                                                        {chat.isGroupChat ? chat.chatName : chat.users.find(user => user.id !== currentUser.id).name}
+                                                    </h3>
+                                                    <p className="text-sm text-gray-400">
+                                                        {chat.latestMessage ? `${chat.latestMessage.content} - ${new Date(chat.latestMessage.timestamp).toLocaleTimeString()}` : 'No messages yet'}
+                                                    </p>
+                                                </div>
                                             </div>
                                         </div>
-                                        {chat.latestMessage && (
-                                            <span className="text-sm text-gray-400">
-                                                {new Date(chat.latestMessage.createdAt).toLocaleTimeString()}
-                                            </span>
-                                        )}
-                                    </div>
-                                ))
+                                    ))
                             ) : (
                                 <div className="p-4 text-center text-gray-500">
                                     No chats available
