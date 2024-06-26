@@ -3,14 +3,16 @@ import {
     SIGN_UP_FAIL,
     SIGN_IN_SUCCESS,
     SIGN_IN_FAIL,
-    LOGOUT
+    LOGOUT,
+    SET_USER
 } from '../actions/authActions';
 
 const initialState = {
     token: localStorage.getItem('token'),
     isAuthenticated: !!localStorage.getItem('token'),
     loading: false,
-    error: null
+    error: null,
+    user: null
 };
 
 const authReducer = (state = initialState, action) => {
@@ -39,7 +41,13 @@ const authReducer = (state = initialState, action) => {
                 token: null,
                 isAuthenticated: false,
                 loading: false,
-                error: null
+                error: null,
+                user: null
+            };
+        case SET_USER:
+            return {
+                ...state,
+                user: action.payload
             };
         default:
             return state;

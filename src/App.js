@@ -1,16 +1,24 @@
-import React from 'react';
+// src/App.js
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import Signup from './components/Signup';
 import Signin from './components/Signin';
 import ForgotPasswordModal from './components/ForgotPasswordModal';
 import ResetPasswordModal from './components/ResetPasswordModal';
-import HomePage from './components/HomePage';
+import MainChat from './components/MainChat';
 import ProtectedRoute from './components/ProtectedRoute';
+import { fetchUser } from './actions/authActions';
 
 const App = () => {
     const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
-    console.log('App: isAuthenticated:', isAuthenticated); // Add this log
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            dispatch(fetchUser());
+        }
+    }, [isAuthenticated, dispatch]);
 
     return (
         <Router>
@@ -23,7 +31,7 @@ const App = () => {
                     path="/"
                     element={
                         <ProtectedRoute>
-                            <HomePage />
+                            <MainChat />
                         </ProtectedRoute>
                     }
                 />

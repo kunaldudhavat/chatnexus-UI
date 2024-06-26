@@ -1,15 +1,11 @@
-// api.js
 import axios from 'axios';
 
-// Base URL for the backend API
 const API_URL = 'http://localhost:8080';
 
-// Function to get the JWT token from localStorage
 const getToken = () => {
     return localStorage.getItem('token');
 };
 
-// API service
 const api = axios.create({
     baseURL: API_URL,
     headers: {
@@ -17,7 +13,6 @@ const api = axios.create({
     },
 });
 
-// Interceptor to add the JWT token to each request
 api.interceptors.request.use(
     (config) => {
         const token = getToken();
@@ -31,30 +26,59 @@ api.interceptors.request.use(
     }
 );
 
-// Authentication API calls
 export const authApi = {
     signUp: (data) => api.post('/auth/signup', data),
     signIn: (data) => api.post('/auth/signin', data),
 };
 
-// User API calls
 export const userApi = {
     getProfile: () => api.get('/api/users/profile'),
     updateProfile: (data) => api.put('/api/users/update', data),
-    searchUsers: (query) => api.get(`/api/users/${query}`),  // Ensure this is correct
+    searchUsers: (query) => api.get(`/api/users/${query}`),
 };
 
-// Chat API calls
 export const chatApi = {
-    getChats: () => api.get('/api/chats/user'),
-    createSingleChat: (data) => api.post('/api/chats/single', data),
+    getUserChats: () => api.get('/api/chats/user'),
+    createChat: (userId) => api.post('/api/chats/single', { userId }),
     createGroupChat: (data) => api.post('/api/chats/group', data),
+    getChatById: (chatId) => api.get(`/api/chats/${chatId}`),
 };
 
-// Message API calls
 export const messageApi = {
-    getMessages: (chatId) => api.get(`/api/messages/${chatId}`),
-    sendMessage: (data) => api.post('/api/messages/create', data),
+    getMessages: async (chatId) => {
+        try {
+            const response = await api.get(`/api/messages/${chatId}`);
+            console.log('messageApi.getMessages response:', response.data); // Log the data
+            return response;
+        } catch (error) {
+            console.error('Error fetching messages:', error);
+            throw error;
+        }
+    },
+    sendMessage: async (data) => {
+        try {
+            const response = await api.post('/api/messages/create', data);
+            console.log('messageApi.sendMessage response:', response.data); // Log the data
+            return response;
+        } catch (error) {
+            console.error('Error sending message:', error);
+            throw error;
+        }
+    },
+};
+
+
+export const handleApiError = (error) => {
+    if (error.response) {
+        console.error("API Error:", error.response.data);
+        return error.response.data;
+    } else if (error.request) {
+        console.error("No response received:", error.request);
+        return { message: "No response received from server" };
+    } else {
+        console.error("Error:", error.message);
+        return { message: "An error occurred while processing your request" };
+    }
 };
 
 export default api;

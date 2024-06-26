@@ -4,12 +4,12 @@ import { BiBot, BiPlus, BiDotsVerticalRounded, BiSearch } from 'react-icons/bi';
 import { FiUser } from 'react-icons/fi';
 import { Menu } from '@headlessui/react';
 import { ResizableBox } from 'react-resizable';
-import Profile from './Profile';
-import { fetchChats } from '../actions/chatActions';
-import { userApi } from '../api/api';
-import 'react-resizable/css/styles.css';
 import { HiChat } from "react-icons/hi";
-import { logout } from '../actions/authActions';
+import { fetchChats, setCurrentChat, createChat } from '../actions/chatActions';
+import { logout } from '../actions/authActions'; // Import the logout action
+import { userApi } from '../api/api'; // Import the userApi
+import Profile from './Profile';
+import 'react-resizable/css/styles.css';
 
 const Sidebar = () => {
     const [showProfile, setShowProfile] = useState(false);
@@ -28,13 +28,11 @@ const Sidebar = () => {
 
     const handleSearchChange = async (e) => {
         const query = e.target.value;
-        console.log('Search query:', query); // Debug log
         setSearchQuery(query);
 
         if (query.length > 0) {
             try {
                 const response = await userApi.searchUsers(query);
-                console.log('Search results:', response.data); // Debug log
                 setSearchResults(response.data);
             } catch (error) {
                 console.error('Error searching users:', error);
@@ -44,7 +42,29 @@ const Sidebar = () => {
         }
     };
 
+    const handleUserClick = async (userId) => {
+        if (!userId) {
+            console.error('User ID is undefined');
+            return;
+        }
 
+        try {
+            const newChat = await dispatch(createChat(userId));
+            dispatch(setCurrentChat(newChat.id));
+            setSearchQuery('');
+            setSearchResults([]);
+        } catch (error) {
+            console.error('Error creating chat:', error);
+        }
+    };
+
+    const handleChatClick = (chatId) => {
+        if (!chatId) {
+            console.error('Chat ID is undefined');
+            return;
+        }
+        dispatch(setCurrentChat(chatId));
+    };
 
     return (
         <ResizableBox
@@ -132,7 +152,11 @@ const Sidebar = () => {
                         <div className="flex-1 overflow-y-auto">
                             {searchResults.length > 0 ? (
                                 searchResults.map((user) => (
-                                    <div key={user.id} className="p-4 flex items-center justify-between hover:bg-gray-700 cursor-pointer">
+                                    <div
+                                        key={user.id}
+                                        className="p-4 flex items-center justify-between hover:bg-gray-700 cursor-pointer"
+                                        onClick={() => handleUserClick(user.id)}
+                                    >
                                         <div className="flex items-center space-x-3">
                                             <div className="bg-gray-800 rounded-full h-10 w-10 flex items-center justify-center">
                                                 <FiUser className="text-2xl text-gray-400" />
@@ -144,21 +168,33 @@ const Sidebar = () => {
                                         </div>
                                     </div>
                                 ))
-                            ) : (
+                            ) : chats.length > 0 ? (
                                 chats.map((chat) => (
-                                    <div key={chat.id} className="p-4 flex items-center justify-between hover:bg-gray-700 cursor-pointer">
+                                    <div
+                                        key={chat.id}
+                                        className="p-4 flex items-center justify-between hover:bg-gray-700 cursor-pointer"
+                                        onClick={() => handleChatClick(chat.id)}
+                                    >
                                         <div className="flex items-center space-x-3">
                                             <div className="bg-gray-800 rounded-full h-10 w-10 flex items-center justify-center">
                                                 <FiUser className="text-2xl text-gray-400" />
                                             </div>
                                             <div>
-                                                <h3 className="text-lg font-semibold">{chat.name}</h3>
-                                                <p className="text-sm text-gray-400">{chat.lastMessage}</p>
+                                                <h3 className="text-lg font-semibold">{chat.isGroupChat ? chat.chatName : chat.users[0].name}</h3>
+                                                <p className="text-sm text-gray-400">{chat.latestMessage ? chat.latestMessage.content : 'No messages yet'}</p>
                                             </div>
                                         </div>
-                                        <span className="text-sm text-gray-400">{new Date(chat.updatedAt).toLocaleTimeString()}</span>
+                                        {chat.latestMessage && (
+                                            <span className="text-sm text-gray-400">
+                                                {new Date(chat.latestMessage.createdAt).toLocaleTimeString()}
+                                            </span>
+                                        )}
                                     </div>
                                 ))
+                            ) : (
+                                <div className="p-4 text-center text-gray-500">
+                                    No chats available
+                                </div>
                             )}
                         </div>
                     </>

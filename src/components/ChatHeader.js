@@ -1,8 +1,22 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 import { BiVideo, BiPhone, BiSearch } from 'react-icons/bi';
 import { FiUser } from 'react-icons/fi';
 
-const ChatHeader = ({ chatName, status }) => {
+const ChatHeader = () => {
+    const currentChat = useSelector((state) => state.chat.currentChat);
+    const currentUser = useSelector((state) => state.auth.user);
+
+    // Log currentChat and currentUser to debug
+    console.log('ChatHeader: currentChat:', currentChat);
+    console.log('ChatHeader: currentUser:', currentUser);
+
+    if (!currentChat || !currentUser) return null;
+
+    const chatName = currentChat.isGroupChat
+        ? currentChat.chatName
+        : currentChat.users.find(user => user.id !== currentUser.id)?.name || 'User';
+
     return (
         <div className="flex items-center justify-between p-4 h-16 bg-gray-900 text-white border-b border-gray-700">
             <div className="flex items-center space-x-4">
@@ -11,7 +25,7 @@ const ChatHeader = ({ chatName, status }) => {
                 </div>
                 <div>
                     <h3 className="text-lg font-semibold">{chatName}</h3>
-                    <p className="text-sm text-gray-400">{status}</p>
+                    <p className="text-sm text-gray-400">{currentChat.isGroupChat ? 'Group' : 'Online'}</p>
                 </div>
             </div>
             <div className="flex space-x-4">
