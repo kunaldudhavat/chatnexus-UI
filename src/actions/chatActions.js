@@ -10,7 +10,6 @@ export const fetchChats = () => async (dispatch, getState) => {
     try {
         const response = await chatApi.getUserChats();
         const currentUser = getState().auth.user;
-        console.log('fetchChats: response.data:', response.data);
 
         const chatsWithLatestMessages = response.data
             .map(chat => {
@@ -19,11 +18,9 @@ export const fetchChats = () => async (dispatch, getState) => {
             })
             .filter(chat => chat.users.some(user => user.id !== currentUser.id)); // Filter out chats with only the current user
 
-        console.log('fetchChats: chatsWithLatestMessages:', chatsWithLatestMessages);
         dispatch({ type: SET_CHATS, payload: chatsWithLatestMessages });
     } catch (error) {
         const errorMessage = handleApiError(error);
-        console.error('Error fetching chats:', errorMessage);
     }
 };
 

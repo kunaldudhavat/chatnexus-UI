@@ -9,8 +9,6 @@ const MainChat = () => {
     const currentChat = useSelector((state) => state.chat.currentChat);
     const currentUser = useSelector((state) => state.auth.user);
     // Log currentChat to see if it's being set
-    console.log('MainChat: currentUser:', currentUser);
-    console.log('MainChat: currentChat:', currentChat);
 
     return (
         <div className="flex h-screen bg-gray-900">

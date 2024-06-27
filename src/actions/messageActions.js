@@ -7,7 +7,7 @@ export const ADD_MESSAGE = 'ADD_MESSAGE';
 export const fetchMessages = (chatId) => async (dispatch) => {
     try {
         const response = await messageApi.getMessages(chatId);
-        console.log('fetchMessages: response.data:', response.data); // Log the data
+        //console.log('fetchMessages: response.data:', response.data); // Log the data
         dispatch({ type: SET_MESSAGES, payload: response.data });
     } catch (error) {
         const errorMessage = handleApiError(error);

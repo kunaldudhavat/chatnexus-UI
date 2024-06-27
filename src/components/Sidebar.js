@@ -75,9 +75,6 @@ const Sidebar = () => {
         dispatch(setCurrentChat(chatId));
     };
 
-    // Debugging logs
-    console.log('Sidebar: chats:', chats);
-
     return (
         <ResizableBox
             width={400}
