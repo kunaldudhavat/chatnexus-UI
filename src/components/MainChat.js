@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
+import { useWebSocket } from '../hooks/useWebSocket';
 import Sidebar from './Sidebar';
 import ChatHeader from './ChatHeader';
 import ChatMessages from './ChatMessages';
@@ -7,8 +8,7 @@ import MessageInput from './MessageInput';
 
 const MainChat = () => {
     const currentChat = useSelector((state) => state.chat.currentChat);
-    const currentUser = useSelector((state) => state.auth.user);
-    // Log currentChat to see if it's being set
+    useWebSocket();
 
     return (
         <div className="flex h-screen bg-gray-900">

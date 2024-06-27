@@ -1,29 +1,41 @@
 import React, { useState } from 'react';
-import { FiPaperclip, FiSmile, FiSend } from 'react-icons/fi';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import WebSocketService from '../services/WebSocketService';
+import { FiPaperclip, FiSmile, FiSend } from 'react-icons/fi';
+import { ADD_MESSAGE } from '../actions/messageActions';
 
 const MessageInput = () => {
     const [message, setMessage] = useState('');
+    const dispatch = useDispatch();
     const currentChat = useSelector((state) => state.chat.currentChat);
     const currentUser = useSelector((state) => state.auth.user);
 
-    const sendMessage = (e) => {
+    const handleSendMessage = (e) => {
         e.preventDefault();
         if (message.trim() && currentChat && currentUser) {
             const messageData = {
                 content: message,
-                chat: currentChat,
-                user: currentUser,
+                chatId: currentChat.id,
+                userId: currentUser.id,
                 timestamp: new Date().toISOString(),
             };
+
+            // Send message via WebSocket
             WebSocketService.sendMessage('/app/message', messageData);
+
+            // Dispatch message to Redux store
+            dispatch({ type: ADD_MESSAGE, payload: messageData });
+
             setMessage('');
         }
     };
 
+    if (!currentChat) {
+        return null; // If no current chat, render nothing
+    }
+
     return (
-        <form className="flex items-center p-4 bg-gray-900 border-t border-gray-700" onSubmit={sendMessage}>
+        <form className="flex items-center p-4 bg-gray-900 border-t border-gray-700" onSubmit={handleSendMessage}>
             <input
                 type="text"
                 placeholder="Type a message"

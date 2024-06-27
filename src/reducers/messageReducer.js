@@ -9,7 +9,8 @@ const messageReducer = (state = initialState, action) => {
         case SET_MESSAGES:
             return { ...state, messages: action.payload };
         case ADD_MESSAGE:
-            return { ...state, messages: [...state.messages, action.payload] };
+            console.log('Reducer ADD_MESSAGE called with payload:', action.payload);
+            return { ...state, messages: [...state.messages, { ...action.payload }] };
         default:
             return state;
     }
