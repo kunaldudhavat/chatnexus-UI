@@ -1,4 +1,3 @@
-// src/components/Sidebar.js
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { BiBot, BiPlus, BiDotsVerticalRounded, BiSearch } from 'react-icons/bi';
@@ -22,17 +21,20 @@ const Sidebar = () => {
     const currentChat = useSelector((state) => state.chat.currentChat);
 
     useEffect(() => {
-        dispatch(fetchChats());
-
-        // Retrieve the stored chat ID from local storage
-        const storedChatId = localStorage.getItem('currentChatId');
-        if (storedChatId) {
-            dispatch(setCurrentChat(parseInt(storedChatId)));
-        }
+        const fetchData = async () => {
+            console.log("Fetching chats in Sidebar...");
+            const fetchedChats = await dispatch(fetchChats());
+            console.log("Fetched chats: ", fetchedChats);
+            const storedChatId = localStorage.getItem('currentChatId');
+            console.log("Stored chat ID in Sidebar: ", storedChatId);
+            if (storedChatId && fetchedChats.length > 0) {
+                dispatch(setCurrentChat(parseInt(storedChatId)));
+            }
+        };
+        fetchData();
     }, [dispatch]);
 
     useEffect(() => {
-        // Store the current chat ID in local storage
         if (currentChat) {
             localStorage.setItem('currentChatId', currentChat.id);
         }
@@ -50,7 +52,7 @@ const Sidebar = () => {
         if (query.length > 0) {
             try {
                 const response = await userApi.searchUsers(query);
-                const filteredResults = response.data.filter(user => user.id !== currentUser.id);
+                const filteredResults = response.data.filter(user => user.id !== currentUser?.id);
                 setSearchResults(filteredResults);
             } catch (error) {
                 console.error('Error searching users:', error);
@@ -74,6 +76,16 @@ const Sidebar = () => {
     const handleChatClick = (chatId) => {
         dispatch(setCurrentChat(chatId));
     };
+
+    if (!currentUser) {
+        return (
+            <div className="flex items-center justify-center h-full text-white">
+                <div className="text-center">
+                    <h2 className="text-2xl font-bold mb-2">Loading...</h2>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <ResizableBox
@@ -183,12 +195,12 @@ const Sidebar = () => {
                                 ))
                             ) : chats.length > 0 ? (
                                 chats
-                                    .filter(chat => chat.users.some(user => user.id !== currentUser.id)) // Filter out chats with only the current user
+                                    .filter(chat => chat.users.some(user => user.id !== currentUser.id))
                                     .map((chat) => (
                                         <div
                                             key={chat.id}
                                             className={`p-4 flex items-center justify-between cursor-pointer ${
-                                                currentChat && currentChat.id === chat.id ? 'bg-gray-700' : 'hover:bg-gray-700'
+                                                currentChat && currentChat.id === chat.id ? 'bg-gray-700' : 'hover:bg-gray-800'
                                             }`}
                                             onClick={() => handleChatClick(chat.id)}
                                         >
@@ -201,7 +213,9 @@ const Sidebar = () => {
                                                         {chat.isGroupChat ? chat.chatName : chat.users.find(user => user.id !== currentUser.id).name}
                                                     </h3>
                                                     <p className="text-sm text-gray-400">
-                                                        {chat.latestMessage ? `${chat.latestMessage.content} - ${new Date(chat.latestMessage.timestamp).toLocaleTimeString()}` : 'No messages yet'}
+                                                        {chat.latestMessage
+                                                            ? `${chat.latestMessage.content.substring(0, 30)}${chat.latestMessage.content.length > 30 ? '...' : ''} - ${new Date(chat.latestMessage.timestamp).toLocaleTimeString()}`
+                                                            : 'No messages yet'}
                                                     </p>
                                                 </div>
                                             </div>

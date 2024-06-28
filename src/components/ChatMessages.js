@@ -12,19 +12,15 @@ const ChatMessages = () => {
 
     useEffect(() => {
         if (currentChat) {
-            console.log(`Fetching messages for chat ID: ${currentChat.id}`);
             dispatch(fetchMessages(currentChat.id));
 
             WebSocketService.connect(() => {
-                console.log(`Connected to WebSocket, subscribing to /group/${currentChat.id}`);
                 WebSocketService.subscribe(`/group/${currentChat.id}`, (message) => {
-                    console.log('Received message via WebSocket:', message);
                     dispatch(addMessage(message));
                 });
             });
 
             return () => {
-                console.log('Disconnecting from WebSocket');
                 WebSocketService.disconnect();
             };
         }

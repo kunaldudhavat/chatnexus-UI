@@ -1,14 +1,30 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useWebSocket } from '../hooks/useWebSocket';
 import Sidebar from './Sidebar';
 import ChatHeader from './ChatHeader';
 import ChatMessages from './ChatMessages';
 import MessageInput from './MessageInput';
+import { fetchChats, setCurrentChat } from '../actions/chatActions';
 
 const MainChat = () => {
+    const dispatch = useDispatch();
     const currentChat = useSelector((state) => state.chat.currentChat);
     useWebSocket();
+
+    useEffect(() => {
+        const fetchData = async () => {
+            console.log("Fetching chats in MainChat...");
+            const fetchedChats = await dispatch(fetchChats());
+            console.log("Fetched chats: ", fetchedChats);
+            const storedChatId = localStorage.getItem('currentChatId');
+            console.log("Stored chat ID in MainChat: ", storedChatId);
+            if (storedChatId && fetchedChats.length > 0) {
+                dispatch(setCurrentChat(parseInt(storedChatId)));
+            }
+        };
+        fetchData();
+    }, [dispatch]);
 
     return (
         <div className="flex h-screen bg-gray-900">
