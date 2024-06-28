@@ -178,7 +178,7 @@ const Sidebar = () => {
                                         className={`p-4 flex items-center justify-between cursor-pointer ${
                                             currentChat && currentChat.users.some(u => u.id === user.id)
                                                 ? 'bg-gray-700'
-                                                : 'hover:bg-gray-700'
+                                                : 'hover:bg-gray-800'
                                         }`}
                                         onClick={() => handleUserClick(user.id)}
                                     >

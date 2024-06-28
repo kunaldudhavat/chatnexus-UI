@@ -1,3 +1,4 @@
+// src/components/ChatMessages.js
 import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchMessages, addMessage } from '../actions/messageActions';
@@ -40,6 +41,7 @@ const ChatMessages = () => {
                 {messages.map((message) => (
                     <div
                         key={message.id}
+                        id={`message-${message.id}`}
                         className={`${
                             isCurrentUserMessage(message) ? 'self-end bg-green-600' : 'self-start bg-gray-800'
                         } text-white p-3 rounded-lg max-w-xs`}

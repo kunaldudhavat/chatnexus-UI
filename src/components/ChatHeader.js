@@ -4,13 +4,12 @@ import { useSelector } from 'react-redux';
 import { BiVideo, BiPhone, BiSearch } from 'react-icons/bi';
 import { FiUser } from 'react-icons/fi';
 
-const ChatHeader = () => {
+const ChatHeader = ({ onSearchClick }) => {
     const currentChat = useSelector((state) => state.chat.currentChat);
     const currentUser = useSelector((state) => state.auth.user);
 
     if (!currentChat || !currentUser) return null;
 
-    // Determine the chat name
     const chatName = currentChat.isGroupChat
         ? currentChat.chatName
         : currentChat.users.find(user => user.id !== currentUser.id)?.name || 'User';
@@ -29,7 +28,7 @@ const ChatHeader = () => {
             <div className="flex space-x-4">
                 <BiVideo className="text-2xl cursor-pointer" />
                 <BiPhone className="text-2xl cursor-pointer" />
-                <BiSearch className="text-2xl cursor-pointer" />
+                <BiSearch className="text-2xl cursor-pointer" onClick={onSearchClick} />
             </div>
         </div>
     );
