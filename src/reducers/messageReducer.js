@@ -9,8 +9,15 @@ const messageReducer = (state = initialState, action) => {
         case SET_MESSAGES:
             return { ...state, messages: action.payload };
         case ADD_MESSAGE:
-            console.log('Reducer ADD_MESSAGE called with payload:', action.payload);
-            return { ...state, messages: [...state.messages, { ...action.payload }] };
+            // Check if the message already exists to prevent duplicates
+            const messageExists = state.messages.some(msg => msg.id === action.payload.id);
+            if (messageExists) {
+                return state;
+            }
+            return {
+                ...state,
+                messages: [...state.messages, action.payload]
+            };
         default:
             return state;
     }

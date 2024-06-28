@@ -23,3 +23,8 @@ export const sendMessage = (data) => async (dispatch) => {
         console.error('Error sending message:', errorMessage);
     }
 };
+
+export const addMessage = (message) => ({
+    type: ADD_MESSAGE,
+    payload: message
+});

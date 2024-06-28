@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import WebSocketService from '../services/WebSocketService';
 import { FiPaperclip, FiSmile, FiSend } from 'react-icons/fi';
-import { ADD_MESSAGE } from '../actions/messageActions';
 
 const MessageInput = () => {
     const [message, setMessage] = useState('');
-    const dispatch = useDispatch();
     const currentChat = useSelector((state) => state.chat.currentChat);
     const currentUser = useSelector((state) => state.auth.user);
 
@@ -23,15 +21,13 @@ const MessageInput = () => {
             // Send message via WebSocket
             WebSocketService.sendMessage('/app/message', messageData);
 
-            // Dispatch message to Redux store
-            dispatch({ type: ADD_MESSAGE, payload: messageData });
-
+            // Clear input field
             setMessage('');
         }
     };
 
     if (!currentChat) {
-        return null; // If no current chat, render nothing
+        return null;
     }
 
     return (
