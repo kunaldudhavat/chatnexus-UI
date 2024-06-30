@@ -1,8 +1,9 @@
 import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchUserProfile, fetchCommonGroups } from '../actions/userActions';
+import { setCurrentChat } from '../actions/chatActions';
 import { BsArrowLeft } from 'react-icons/bs';
-import { FiUser } from 'react-icons/fi';
+import { FiUser, FiUsers } from 'react-icons/fi';
 
 const UserProfile = ({ userId, onClose }) => {
     const dispatch = useDispatch();
@@ -18,7 +19,7 @@ const UserProfile = ({ userId, onClose }) => {
     }, [dispatch, userId]);
 
     useEffect(() => {
-        console.log("Common Groups:", commonGroups);  // Debugging: Check common groups
+        console.log("Common Groups between users:", commonGroups);  // Debugging: Check common groups
     }, [commonGroups]);
 
     useEffect(() => {
@@ -33,6 +34,11 @@ const UserProfile = ({ userId, onClose }) => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [onClose]);
+
+    const handleGroupClick = (groupId) => {
+        dispatch(setCurrentChat(groupId));
+        onClose(); // Close the profile view
+    };
 
     if (!userProfile) {
         return (
@@ -76,22 +82,33 @@ const UserProfile = ({ userId, onClose }) => {
                 </div>
                 <div>
                     <label className="block text-sm">Bio</label>
-                    <p className="w-full p-2 bg-gray-800 text-white rounded-lg">{userProfile.profile?.bio}</p>
+                    <p className="w-full p-2 bg-gray-800 text-white rounded-lg">{userProfile.profile?.bio || 'No bio available'}</p>
                 </div>
                 <div>
                     <label className="block text-sm">Location</label>
-                    <p className="w-full p-2 bg-gray-800 text-white rounded-lg">{userProfile.profile?.location}</p>
+                    <p className="w-full p-2 bg-gray-800 text-white rounded-lg">{userProfile.profile?.location || 'Not specified'}</p>
                 </div>
                 <div>
                     <label className="block text-sm">Website</label>
-                    <p className="w-full p-2 bg-gray-800 text-white rounded-lg">{userProfile.profile?.website}</p>
+                    <p className="w-full p-2 bg-gray-800 text-white rounded-lg">{userProfile.profile?.website || 'Not specified'}</p>
                 </div>
                 <div>
                     <h3 className="text-lg font-semibold mt-4">Common Groups</h3>
-                    {commonGroups.length > 0 ? (
+                    {Array.isArray(commonGroups) && commonGroups.length > 0 ? (
                         commonGroups.map((group) => (
-                            <div key={group.id} className="p-2 bg-gray-800 rounded-lg mb-2">
-                                {group.chatName}
+                            <div
+                                key={group.id}
+                                className="p-2 bg-gray-800 rounded-lg mb-2 flex items-center cursor-pointer hover:bg-gray-700"
+                                onClick={() => handleGroupClick(group.id)}
+                            >
+                                <div className="w-10 h-10 mr-3 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden">
+                                    {group.chatImage ? (
+                                        <img src={group.chatImage} alt={group.chatName} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <FiUsers className="text-xl text-gray-400" />
+                                    )}
+                                </div>
+                                <span>{group.chatName}</span>
                             </div>
                         ))
                     ) : (

@@ -4,6 +4,7 @@ import { BiArrowBack } from 'react-icons/bi';
 const GroupDetails = ({ onCreateGroup, onBack }) => {
     const [groupName, setGroupName] = useState('');
     const [groupImage, setGroupImage] = useState(null);
+    const [description, setDescription] = useState('');  // Add this line
 
     const handleGroupImageChange = (e) => {
         if (e.target.files && e.target.files[0]) {
@@ -12,7 +13,7 @@ const GroupDetails = ({ onCreateGroup, onBack }) => {
     };
 
     const handleSubmit = () => {
-        onCreateGroup({ name: groupName, image: groupImage });
+        onCreateGroup({ name: groupName, image: groupImage, description });  // Modify this line
     };
 
     return (
@@ -44,6 +45,12 @@ const GroupDetails = ({ onCreateGroup, onBack }) => {
                     className="mt-4 bg-gray-800 rounded-full p-2 text-white focus:outline-none w-full"
                     value={groupName}
                     onChange={(e) => setGroupName(e.target.value)}
+                />
+                <textarea
+                    placeholder="Group Description"
+                    className="mt-4 bg-gray-800 rounded-lg p-2 text-white focus:outline-none w-full"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
                 />
             </div>
             <div className="p-4">

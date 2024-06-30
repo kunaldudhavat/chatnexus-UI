@@ -1,7 +1,7 @@
 import { FETCH_USER_PROFILE, FETCH_COMMON_GROUPS } from '../actions/userActions';
 
 const initialState = {
-    profile: null,
+    userProfile: null,
     commonGroups: [],
 };
 
@@ -10,7 +10,7 @@ const userReducer = (state = initialState, action) => {
         case FETCH_USER_PROFILE:
             return {
                 ...state,
-                profile: action.payload,
+                userProfile: action.payload,
             };
         case FETCH_COMMON_GROUPS:
             return {

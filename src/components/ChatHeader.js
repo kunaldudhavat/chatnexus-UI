@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { BiVideo, BiPhone, BiSearch } from 'react-icons/bi';
 import { FiUser, FiUsers } from 'react-icons/fi';
 
-const ChatHeader = ({ onSearchClick, onProfileClick }) => {
+const ChatHeader = ({ onSearchClick, onProfileClick, onGroupProfileClick }) => {
     const currentChat = useSelector((state) => state.chat.currentChat);
     const currentUser = useSelector((state) => state.auth.user);
 
@@ -13,14 +13,22 @@ const ChatHeader = ({ onSearchClick, onProfileClick }) => {
         ? currentChat.chatName
         : currentChat.users.find(user => user.id !== currentUser.id)?.name || 'User';
 
-    const profileImage = currentChat.isGroup ? null : currentChat.users.find(user => user.id !== currentUser.id)?.profile?.image;
+    const profileImage = currentChat.isGroup ? currentChat.chatImage : currentChat.users.find(user => user.id !== currentUser.id)?.profile?.image;
+
+    const handleProfileClick = () => {
+        if (currentChat.isGroup) {
+            onGroupProfileClick(currentChat.id);
+        } else {
+            onProfileClick(currentChat.users.find(user => user.id !== currentUser.id)?.id);
+        }
+    };
 
     return (
         <div className="flex items-center justify-between p-4 h-16 bg-gray-700 text-white border-b border-gray-700">
             <div className="flex items-center space-x-4">
                 <div
                     className="bg-gray-800 rounded-full h-10 w-10 flex items-center justify-center cursor-pointer"
-                    onClick={() => onProfileClick(currentChat.users.find(user => user.id !== currentUser.id)?.id)}
+                    onClick={handleProfileClick}
                 >
                     {profileImage ? (
                         <img

@@ -39,14 +39,14 @@ export const userApi = {
             const response = await api.get(`/api/users/${query}`);
             return response.data.map(result => ({
                 ...result,
-                isGroup: result.hasOwnProperty('chatName') // Assuming 'chatName' is a property only for groups
+                isGroup: result.hasOwnProperty('chatName')
             }));
         } catch (error) {
             console.error('Error searching users and groups:', error);
             throw error;
         }
     },
-    getUserProfile: (userId) => api.get(`/api/users/profile/${userId}`),  // Add endpoint to get specific user profile
+    getUserProfile: (userId) => api.get(`/api/users/profile/${userId}`),
     getCommonGroups: (userId) => api.get(`/api/users/common-groups/${userId}`)
 };
 
@@ -57,11 +57,18 @@ export const chatApi = {
     getChatById: (chatId) => api.get(`/api/chats/${chatId}`),
 };
 
+export const groupApi = {
+    getGroupProfile: (groupId) => api.get(`/api/chats/group/${groupId}`),
+    updateGroupProfile: (groupId, data) => api.put(`/api/chats/update-group/${groupId}`, data),
+    addUserToGroup: (groupId, userId) => api.put(`/api/chats/${groupId}/add/${userId}`),
+    removeUserFromGroup: (groupId, userId) => api.put(`/api/chats/${groupId}/remove/${userId}`),
+};
+
 export const messageApi = {
     getMessages: async (chatId) => {
         try {
             const response = await api.get(`/api/messages/${chatId}`);
-            console.log('messageApi.getMessages response:', response.data); // Log the data
+            console.log('messageApi.getMessages response:', response.data);
             return response;
         } catch (error) {
             console.error('Error fetching messages:', error);
@@ -71,7 +78,7 @@ export const messageApi = {
     sendMessage: async (data) => {
         try {
             const response = await api.post('/api/messages/create', data);
-            console.log('messageApi.sendMessage response:', response.data); // Log the data
+            console.log('messageApi.sendMessage response:', response.data);
             return response;
         } catch (error) {
             console.error('Error sending message:', error);

@@ -5,6 +5,7 @@ import chatReducer from '../reducers/chatReducer';
 import messageReducer from "../reducers/messageReducer";
 import searchReducer from "../reducers/searchReducer";
 import userReducer from "../reducers/userReducer";
+import groupReducer from "../reducers/groupReducer";
 
 const rootReducer = combineReducers({
     auth: authReducer,
@@ -12,6 +13,7 @@ const rootReducer = combineReducers({
     message: messageReducer,
     search: searchReducer,
     user: userReducer,
+    group:  groupReducer,
 });
 
 const store = createStore(rootReducer, applyMiddleware(thunk));
