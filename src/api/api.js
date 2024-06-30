@@ -46,6 +46,8 @@ export const userApi = {
             throw error;
         }
     },
+    getUserProfile: (userId) => api.get(`/api/users/profile/${userId}`),  // Add endpoint to get specific user profile
+    getCommonGroups: (userId) => api.get(`/api/users/common-groups/${userId}`)
 };
 
 export const chatApi = {

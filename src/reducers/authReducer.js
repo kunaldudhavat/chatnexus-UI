@@ -4,7 +4,9 @@ import {
     SIGN_IN_SUCCESS,
     SIGN_IN_FAIL,
     LOGOUT,
-    SET_USER
+    SET_USER,
+    FETCH_USER_PROFILE,
+    FETCH_COMMON_GROUPS
 } from '../actions/authActions';
 
 const initialState = {
@@ -12,7 +14,9 @@ const initialState = {
     isAuthenticated: !!localStorage.getItem('token'),
     loading: false,
     error: null,
-    user: null
+    user: null,
+    userProfile: null,
+    commonGroups: []
 };
 
 const authReducer = (state = initialState, action) => {
@@ -42,12 +46,24 @@ const authReducer = (state = initialState, action) => {
                 isAuthenticated: false,
                 loading: false,
                 error: null,
-                user: null
+                user: null,
+                userProfile: null,
+                commonGroups: []
             };
         case SET_USER:
             return {
                 ...state,
                 user: action.payload
+            };
+        case FETCH_USER_PROFILE:
+            return {
+                ...state,
+                userProfile: action.payload
+            };
+        case FETCH_COMMON_GROUPS:
+            return {
+                ...state,
+                commonGroups: action.payload
             };
         default:
             return state;

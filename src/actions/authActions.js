@@ -7,6 +7,8 @@ export const SIGN_IN_SUCCESS = 'SIGN_IN_SUCCESS';
 export const SIGN_IN_FAIL = 'SIGN_IN_FAIL';
 export const LOGOUT = 'LOGOUT';
 export const SET_USER = 'SET_USER';
+export const FETCH_USER_PROFILE = 'FETCH_USER_PROFILE';
+export const FETCH_COMMON_GROUPS = 'FETCH_COMMON_GROUPS';
 
 export const loginSuccess = (token) => ({
     type: SIGN_IN_SUCCESS,

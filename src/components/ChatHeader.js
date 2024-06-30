@@ -3,34 +3,35 @@ import { useSelector } from 'react-redux';
 import { BiVideo, BiPhone, BiSearch } from 'react-icons/bi';
 import { FiUser, FiUsers } from 'react-icons/fi';
 
-const ChatHeader = ({ onSearchClick }) => {
+const ChatHeader = ({ onSearchClick, onProfileClick }) => {
     const currentChat = useSelector((state) => state.chat.currentChat);
     const currentUser = useSelector((state) => state.auth.user);
 
     if (!currentChat || !currentUser) return null;
 
-    const otherUser = currentChat.users.find(user => user.id !== currentUser.id);
-    const chatName = currentChat.isGroup ? currentChat.chatName : otherUser?.name || 'User';
-    const profileImage = otherUser?.profile?.image || null;
+    const chatName = currentChat.isGroup
+        ? currentChat.chatName
+        : currentChat.users.find(user => user.id !== currentUser.id)?.name || 'User';
 
-    console.log('Calculated chat name:', chatName);
+    const profileImage = currentChat.isGroup ? null : currentChat.users.find(user => user.id !== currentUser.id)?.profile?.image;
 
     return (
         <div className="flex items-center justify-between p-4 h-16 bg-gray-700 text-white border-b border-gray-700">
             <div className="flex items-center space-x-4">
-                <div className="bg-gray-800 rounded-full h-10 w-10 flex items-center justify-center">
-                    {currentChat.isGroup ? (
+                <div
+                    className="bg-gray-800 rounded-full h-10 w-10 flex items-center justify-center cursor-pointer"
+                    onClick={() => onProfileClick(currentChat.users.find(user => user.id !== currentUser.id)?.id)}
+                >
+                    {profileImage ? (
+                        <img
+                            src={profileImage}
+                            alt="Profile"
+                            className="w-full h-full rounded-full object-cover"
+                        />
+                    ) : currentChat.isGroup ? (
                         <FiUsers className="text-2xl text-gray-400" />
                     ) : (
-                        profileImage ? (
-                            <img
-                                src={profileImage}
-                                alt="Profile"
-                                className="w-full h-full rounded-full object-cover"
-                            />
-                        ) : (
-                            <FiUser className="text-2xl text-gray-400" />
-                        )
+                        <FiUser className="text-2xl text-gray-400" />
                     )}
                 </div>
                 <div>
