@@ -23,9 +23,14 @@ export const fetchChats = () => async (dispatch, getState) => {
 
         const chatsWithLatestMessages = response.data.map(chat => {
             const latestMessage = chat.messages && chat.messages.length > 0 ? chat.messages[chat.messages.length - 1] : null;
-            console.log(`Chat ID: ${chat.id}, Latest Message: `, latestMessage);
-            return { ...chat, latestMessage };
-        }).filter(chat => chat.users.some(user => user.id !== currentUser.id));
+            console.log('Processing chat:', chat);
+            return {
+                ...chat,
+                isGroup: chat.group,
+                chatName: chat.group ? (chat.chatName || 'Unnamed Group') : chat.users.find(user => user.id !== currentUser.id)?.name || 'User',
+                latestMessage: latestMessage ? { ...latestMessage, timestamp: new Date(latestMessage.timestamp) } : null
+            };
+        });
 
         dispatch({ type: SET_CHATS, payload: chatsWithLatestMessages });
         return chatsWithLatestMessages;
@@ -39,13 +44,32 @@ export const fetchChats = () => async (dispatch, getState) => {
 export const createChat = (userId) => async (dispatch) => {
     try {
         const response = await chatApi.createChat(userId);
-        const newChat = { ...response.data, latestMessage: null };
+        const newChat = { ...response.data, latestMessage: null, isGroupChat: false };
         dispatch({ type: ADD_CHAT, payload: newChat });
         dispatch({ type: SET_CURRENT_CHAT, payload: newChat });
         return newChat;
     } catch (error) {
         const errorMessage = handleApiError(error);
         console.error('Error creating chat:', errorMessage);
+        throw error;
+    }
+};
+
+export const createGroupChat = (groupData) => async (dispatch) => {
+    try {
+        const response = await chatApi.createGroupChat(groupData);
+        const newGroupChat = {
+            ...response.data,
+            latestMessage: null,
+            isGroupChat: true,
+            chatName: groupData.chatName || response.data.chatName || 'Unnamed Group'
+        };
+        dispatch({ type: ADD_CHAT, payload: newGroupChat });
+        dispatch({ type: SET_CURRENT_CHAT, payload: newGroupChat });
+        return newGroupChat;
+    } catch (error) {
+        const errorMessage = handleApiError(error);
+        console.error('Error creating group chat:', errorMessage);
         throw error;
     }
 };

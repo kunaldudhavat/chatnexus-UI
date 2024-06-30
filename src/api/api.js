@@ -34,7 +34,18 @@ export const authApi = {
 export const userApi = {
     getProfile: () => api.get('/api/users/profile'),
     updateProfile: (data) => api.put('/api/users/update', data),
-    searchUsers: (query) => api.get(`/api/users/${query}`),
+    searchUsers: async (query) => {
+        try {
+            const response = await api.get(`/api/users/${query}`);
+            return response.data.map(result => ({
+                ...result,
+                isGroup: result.hasOwnProperty('chatName') // Assuming 'chatName' is a property only for groups
+            }));
+        } catch (error) {
+            console.error('Error searching users and groups:', error);
+            throw error;
+        }
+    },
 };
 
 export const chatApi = {

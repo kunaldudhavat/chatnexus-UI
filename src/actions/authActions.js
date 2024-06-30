@@ -53,3 +53,13 @@ export const logout = () => (dispatch) => {
     localStorage.removeItem('token');
     dispatch({ type: LOGOUT });
 };
+
+export const updateUser = (data) => async (dispatch) => {
+    try {
+        await userApi.updateProfile(data.data);
+        const response = await userApi.getProfile();
+        dispatch(setUser(response.data));
+    } catch (error) {
+        console.error('Error updating user:', error);
+    }
+};

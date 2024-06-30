@@ -9,9 +9,9 @@ const ChatHeader = ({ onSearchClick }) => {
 
     if (!currentChat || !currentUser) return null;
 
-    const chatName = currentChat.isGroup
-        ? currentChat.chatName
-        : currentChat.users.find(user => user.id !== currentUser.id)?.name || 'User';
+    const otherUser = currentChat.users.find(user => user.id !== currentUser.id);
+    const chatName = currentChat.isGroup ? currentChat.chatName : otherUser?.name || 'User';
+    const profileImage = otherUser?.profile?.image || null;
 
     console.log('Calculated chat name:', chatName);
 
@@ -22,7 +22,15 @@ const ChatHeader = ({ onSearchClick }) => {
                     {currentChat.isGroup ? (
                         <FiUsers className="text-2xl text-gray-400" />
                     ) : (
-                        <FiUser className="text-2xl text-gray-400" />
+                        profileImage ? (
+                            <img
+                                src={profileImage}
+                                alt="Profile"
+                                className="w-full h-full rounded-full object-cover"
+                            />
+                        ) : (
+                            <FiUser className="text-2xl text-gray-400" />
+                        )
                     )}
                 </div>
                 <div>

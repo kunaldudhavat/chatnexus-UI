@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchUser, setUser } from '../actions/authActions';
 import { userApi } from '../api/api';
+import { BsPencil } from "react-icons/bs";
 
 const Profile = ({ closeProfile }) => {
     const dispatch = useDispatch();
@@ -12,6 +13,7 @@ const Profile = ({ closeProfile }) => {
     const [website, setWebsite] = useState(user?.profile?.website || '');
     const [isEditing, setIsEditing] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
+    const [tempPicture, setTempPicture] = useState(user?.profile?.image || null);
 
     useEffect(() => {
         if (!user) {
@@ -26,12 +28,13 @@ const Profile = ({ closeProfile }) => {
             setBio(user.profile?.bio || '');
             setLocation(user.profile?.location || '');
             setWebsite(user.profile?.website || '');
+            setTempPicture(user.profile?.image || null);
         }
     }, [user]);
 
     const handleSave = async (e) => {
         e.preventDefault();
-        const updatedProfile = { bio, location, website };
+        const updatedProfile = { bio, location, website, image: tempPicture };
         const updatedUser = { name, profile: updatedProfile };
         console.log("Sending update request:", updatedUser);
         try {
@@ -45,13 +48,57 @@ const Profile = ({ closeProfile }) => {
         }
     };
 
+    const uploadToCloudinary = (pics) => {
+        const data = new FormData();
+        data.append("file", pics);
+        data.append("upload_preset", "chatapp");
+        data.append("cloud_name", "dhuitsl8d");
+        fetch("https://api.cloudinary.com/v1_1/dhuitsl8d/image/upload", {
+            method: "post",
+            body: data,
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                setTempPicture(data.url.toString());
+                const dataa = {
+                    id: user.id,
+                    token: localStorage.getItem("token"),
+                    data: { profile: { image: data.url.toString() } },
+                };
+                dispatch(setUser({ ...user, profile: { ...user.profile, image: data.url.toString() } }));
+            });
+    };
+
     return (
         <div className="p-4 bg-gray-900 text-white h-full">
             <div className="flex justify-end">
                 <button onClick={closeProfile} className="text-lg font-bold">X</button>
             </div>
             <div className="flex flex-col items-center">
-                <div className="w-24 h-24 bg-gray-700 rounded-full mb-4"></div>
+                <div className="w-24 h-24 bg-gray-700 rounded-full mb-4 relative">
+                    {tempPicture ? (
+                        <img
+                            src={tempPicture}
+                            alt="Profile"
+                            className="w-full h-full rounded-full object-cover"
+                        />
+                    ) : (
+                        <div className="flex items-center justify-center h-full">
+                            <BsPencil className="text-2xl text-gray-400" />
+                        </div>
+                    )}
+                    {isEditing && (
+                        <label htmlFor="imgInput" className="absolute inset-0 flex items-center justify-center cursor-pointer bg-gray-700 bg-opacity-50 rounded-full">
+                            <BsPencil className="text-2xl text-white" />
+                            <input
+                                type="file"
+                                id="imgInput"
+                                className="hidden"
+                                onChange={(e) => uploadToCloudinary(e.target.files[0])}
+                            />
+                        </label>
+                    )}
+                </div>
                 <h2 className="text-xl font-bold">{name || 'John Doe'}</h2>
                 <p className="text-gray-400">{user?.status || 'Available'}</p>
             </div>

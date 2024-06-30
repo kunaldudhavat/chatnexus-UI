@@ -57,24 +57,54 @@ const Sidebar = () => {
         if (query.length > 0) {
             try {
                 const response = await userApi.searchUsers(query);
-                const filteredResults = response.data.filter(user => user.id !== currentUser.id);
-                setSearchResults(filteredResults);
+                console.log('Search response:', response); // Log the response to see its structure
+                if (Array.isArray(response)) {
+                    const filteredResults = response.filter(result => {
+                        if (result.isGroup) {
+                            // Only include groups the user is a member of
+                            return result.users.some(user => user.id === currentUser.id);
+                        }
+                        // For individual users, exclude the current user
+                        return result.id !== currentUser.id;
+                    });
+                    setSearchResults(filteredResults);
+                } else {
+                    console.error('Unexpected response format:', response);
+                    setSearchResults([]);
+                }
             } catch (error) {
                 console.error('Error searching users:', error);
+                setSearchResults([]);
             }
         } else {
             setSearchResults([]);
         }
     };
 
-    const handleUserClick = async (userId) => {
+    const handleResultClick = async (result) => {
         try {
-            const newChat = await dispatch(createChat(userId));
-            dispatch(setCurrentChat(newChat.id));
+            if (result.isGroup) {
+                // Handle group click
+                dispatch(setCurrentChat(result.id));
+            } else {
+                // Handle user click
+                const existingChat = chats.find(chat =>
+                    chat.users.some(user => user.id === result.id) && !chat.isGroup
+                );
+
+                if (existingChat) {
+                    dispatch(setCurrentChat(existingChat.id));
+                } else {
+                    const newChat = await dispatch(createChat(result.id));
+                    dispatch(setCurrentChat(newChat.id));
+                }
+            }
+
             setSearchQuery('');
             setSearchResults([]);
+            setCurrentView('chats');
         } catch (error) {
-            console.error('Error creating chat:', error);
+            console.error('Error creating or fetching chat:', error);
         }
     };
 
@@ -104,16 +134,15 @@ const Sidebar = () => {
     const createGroup = async (details) => {
         try {
             const payload = {
-                userIds: [currentUser.id, ...groupMembers.map(user => user.id)],
+                userIds: groupMembers.map(user => user.id),
                 chatName: details.name,
                 chatImage: details.image,
             };
-            const newGroupChat = await dispatch(createGroupChat(payload));
+            await dispatch(createGroupChat(payload));
             setGroupMembers([]);
             setGroupDetails(null);
             setIsCreatingGroup(false);
             setCurrentView('chats');
-            dispatch(fetchChats()); // Refresh chat list
         } catch (error) {
             console.error('Error creating group chat:', error);
         }
@@ -219,19 +248,25 @@ const Sidebar = () => {
                                 <div
                                     key={result.id}
                                     className="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-800"
-                                    onClick={() => handleUserClick(result.id)}
+                                    onClick={() => handleResultClick(result)}
                                 >
                                     <div className="flex items-center space-x-3">
                                         <div className="bg-gray-800 rounded-full h-10 w-10 flex items-center justify-center">
-                                            {result.group ? (
+                                            {result.profile && result.profile.image ? (
+                                                <img
+                                                    src={result.profile.image}
+                                                    alt="Profile"
+                                                    className="w-full h-full rounded-full object-cover"
+                                                />
+                                            ) : result.isGroup ? (
                                                 <FiUsers className="text-2xl text-gray-400" />
                                             ) : (
                                                 <FiUser className="text-2xl text-gray-400" />
                                             )}
                                         </div>
                                         <div>
-                                            <h3 className="text-lg font-semibold">{result.group ? result.chatName : result.name}</h3>
-                                            <p className="text-sm text-gray-400">{result.email || result.users.map(user => user.email).join(', ')}</p>
+                                            <h3 className="text-lg font-semibold">{result.isGroup ? result.chatName : result.name}</h3>
+                                            <p className="text-sm text-gray-400">{result.email || (result.isGroup ? 'Group' : '')}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -271,19 +306,25 @@ const Sidebar = () => {
                                                 ? 'bg-gray-700'
                                                 : 'hover:bg-gray-800'
                                         }`}
-                                        onClick={() => handleUserClick(result.id)}
+                                        onClick={() => handleResultClick(result)}
                                     >
                                         <div className="flex items-center space-x-3">
                                             <div className="bg-gray-800 rounded-full h-10 w-10 flex items-center justify-center">
-                                                {result.group ? (
+                                                {result.profile && result.profile.image ? (
+                                                    <img
+                                                        src={result.profile.image}
+                                                        alt="Profile"
+                                                        className="w-full h-full rounded-full object-cover"
+                                                    />
+                                                ) : result.isGroup ? (
                                                     <FiUsers className="text-2xl text-gray-400" />
                                                 ) : (
                                                     <FiUser className="text-2xl text-gray-400" />
                                                 )}
                                             </div>
                                             <div>
-                                                <h3 className="text-lg font-semibold">{result.group ? result.chatName : result.name}</h3>
-                                                <p className="text-sm text-gray-400">{result.email || result.users.map(user => user.email).join(', ')}</p>
+                                                <h3 className="text-lg font-semibold">{result.isGroup ? result.chatName : result.name}</h3>
+                                                <p className="text-sm text-gray-400">{result.email || (result.isGroup ? 'Group' : '')}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -294,6 +335,7 @@ const Sidebar = () => {
                                     const chatName = chat.isGroup
                                         ? chat.chatName
                                         : chat.users.find(user => user.id !== currentUser.id)?.name || 'User';
+                                    const profileImage = chat.isGroup ? null : chat.users.find(user => user.id !== currentUser.id)?.profile?.image;
                                     return (
                                         <div
                                             key={chat.id}
@@ -306,6 +348,11 @@ const Sidebar = () => {
                                                 <div className="bg-gray-800 rounded-full h-10 w-10 flex items-center justify-center">
                                                     {chat.isGroup ? (
                                                         <FiUsers className="text-2xl text-gray-400" />
+                                                    ) : profileImage ? (
+                                                        <img
+                                                            src={profileImage}
+                                                            alt="Profile" className="w-full h-full rounded-full object-cover"
+                                                        />
                                                     ) : (
                                                         <FiUser className="text-2xl text-gray-400" />
                                                     )}
