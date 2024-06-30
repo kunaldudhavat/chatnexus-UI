@@ -1,8 +1,7 @@
-// src/components/ChatHeader.js
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { BiVideo, BiPhone, BiSearch } from 'react-icons/bi';
-import { FiUser } from 'react-icons/fi';
+import { FiUser, FiUsers } from 'react-icons/fi';
 
 const ChatHeader = ({ onSearchClick }) => {
     const currentChat = useSelector((state) => state.chat.currentChat);
@@ -10,19 +9,25 @@ const ChatHeader = ({ onSearchClick }) => {
 
     if (!currentChat || !currentUser) return null;
 
-    const chatName = currentChat.isGroupChat
+    const chatName = currentChat.isGroup
         ? currentChat.chatName
         : currentChat.users.find(user => user.id !== currentUser.id)?.name || 'User';
+
+    console.log('Calculated chat name:', chatName);
 
     return (
         <div className="flex items-center justify-between p-4 h-16 bg-gray-700 text-white border-b border-gray-700">
             <div className="flex items-center space-x-4">
                 <div className="bg-gray-800 rounded-full h-10 w-10 flex items-center justify-center">
-                    <FiUser className="text-2xl text-gray-400" />
+                    {currentChat.isGroup ? (
+                        <FiUsers className="text-2xl text-gray-400" />
+                    ) : (
+                        <FiUser className="text-2xl text-gray-400" />
+                    )}
                 </div>
                 <div>
                     <h3 className="text-lg font-semibold">{chatName}</h3>
-                    <p className="text-sm text-gray-400">{currentChat.isGroupChat ? 'Group' : 'Online'}</p>
+                    <p className="text-sm text-gray-400">{currentChat.isGroup ? 'Group' : 'Online'}</p>
                 </div>
             </div>
             <div className="flex space-x-4">
