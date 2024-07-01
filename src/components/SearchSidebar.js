@@ -1,8 +1,7 @@
-// src/components/SearchSidebar.js
 import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setSearchResults } from '../actions/searchActions';
-import {CgClose} from "react-icons/cg";
+import { CgClose } from "react-icons/cg";
 
 const SearchSidebar = ({ onClose }) => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -37,12 +36,12 @@ const SearchSidebar = ({ onClose }) => {
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, []);
+    }, [handleClickOutside]);
 
     useEffect(() => {
         searchInputRef.current?.focus();
         return () => {
-            dispatch(setSearchResults([])); // Reset search results when component unmounts
+            dispatch(setSearchResults([]));
         };
     }, [dispatch]);
 

@@ -8,7 +8,7 @@ const ForgotPasswordModal = ({ onClose }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Perform forgot password logic here
+        // forgot password logic to be added here
         setMessage('Please check your email for the password reset link if the email entered is correct.');
     };
 

@@ -42,7 +42,7 @@ const Profile = ({ closeProfile }) => {
             dispatch(setUser({ ...user, name, profile: updatedProfile }));
             setSuccessMessage('Profile saved successfully.');
             setIsEditing(false);
-            setTimeout(() => setSuccessMessage(''), 3000); // Clear the success message after 3 seconds
+            setTimeout(() => setSuccessMessage(''), 3000);
         } catch (error) {
             console.error('Error updating profile:', error);
         }
@@ -60,11 +60,8 @@ const Profile = ({ closeProfile }) => {
             .then((res) => res.json())
             .then((data) => {
                 setTempPicture(data.url.toString());
-                const dataa = {
-                    id: user.id,
-                    token: localStorage.getItem("token"),
-                    data: { profile: { image: data.url.toString() } },
-                };
+                localStorage.getItem("token");
+                data.url.toString();
                 dispatch(setUser({ ...user, profile: { ...user.profile, image: data.url.toString() } }));
             });
     };

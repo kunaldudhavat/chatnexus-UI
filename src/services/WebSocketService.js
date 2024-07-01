@@ -58,5 +58,6 @@ class WebSocketService {
         console.error('WebSocket Error:', error);
     }
 }
+const instance = new WebSocketService()
 
-export default new WebSocketService();
+export default instance;

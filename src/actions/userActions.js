@@ -15,7 +15,7 @@ export const fetchUserProfile = (userId) => async (dispatch) => {
 export const fetchCommonGroups = (userId) => async (dispatch) => {
     try {
         const response = await userApi.getCommonGroups(userId);
-        dispatch({ type: FETCH_COMMON_GROUPS, payload: response.data }); // Changed to response.data
+        dispatch({ type: FETCH_COMMON_GROUPS, payload: response.data });
     } catch (error) {
         console.error('Error fetching common groups:', error);
     }

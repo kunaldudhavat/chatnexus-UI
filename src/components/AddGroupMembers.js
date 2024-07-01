@@ -7,7 +7,7 @@ const AddGroupMembers = ({ onAddMember, onNext, onBack, currentUser }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [selectedUsers, setSelectedUsers] = useState([]);
-    const [groupDescription, setGroupDescription] = useState('');
+    const [groupDescription] = useState('');
 
     const handleSearchChange = async (e) => {
         const query = e.target.value;
@@ -16,9 +16,6 @@ const AddGroupMembers = ({ onAddMember, onNext, onBack, currentUser }) => {
         if (query.length > 0) {
             try {
                 const response = await userApi.searchUsers(query);
-                console.log('Search response:', response); // Log the entire response
-
-                // Check if the response contains the data property and is an array
                 if (response && Array.isArray(response)) {
                     const filteredResults = response.filter(user => user.id !== currentUser.id && !user.group);
                     setSearchResults(filteredResults);

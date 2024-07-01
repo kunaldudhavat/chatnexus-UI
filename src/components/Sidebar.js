@@ -17,10 +17,10 @@ const Sidebar = () => {
     const [showProfile, setShowProfile] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
-    const [isCreatingGroup, setIsCreatingGroup] = useState(false);
+    const [setIsCreatingGroup] = useState(false);
     const [groupMembers, setGroupMembers] = useState([]);
-    const [groupDetails, setGroupDetails] = useState(null);
-    const [currentView, setCurrentView] = useState('chats'); // 'chats', 'newChat', 'addGroupMembers', 'groupDetails'
+    const [setGroupDetails] = useState(null);
+    const [currentView, setCurrentView] = useState('chats');
 
     const dispatch = useDispatch();
     const chats = useSelector((state) => state.chat.chats);
@@ -57,14 +57,11 @@ const Sidebar = () => {
         if (query.length > 0) {
             try {
                 const response = await userApi.searchUsers(query);
-                console.log('Search response:', response); // Log the response to see its structure
                 if (Array.isArray(response)) {
                     const filteredResults = response.filter(result => {
                         if (result.isGroup) {
-                            // Only include groups the user is a member of
                             return result.users.some(user => user.id === currentUser.id);
                         }
-                        // For individual users, exclude the current user
                         return result.id !== currentUser.id;
                     });
                     setSearchResults(filteredResults);
@@ -84,10 +81,8 @@ const Sidebar = () => {
     const handleResultClick = async (result) => {
         try {
             if (result.isGroup) {
-                // Handle group click
                 dispatch(setCurrentChat(result.id));
             } else {
-                // Handle user click
                 const existingChat = chats.find(chat =>
                     chat.users.some(user => user.id === result.id) && !chat.isGroup
                 );
@@ -111,13 +106,6 @@ const Sidebar = () => {
     const handleChatClick = (chatId) => {
         dispatch(setCurrentChat(chatId));
     };
-
-    const startGroupCreation = () => {
-        setGroupMembers([]);
-        setIsCreatingGroup(true);
-        setCurrentView('addGroupMembers');
-    };
-
     const addGroupMember = (member) => {
         setGroupMembers(prev => [...prev, member]);
     };
@@ -125,12 +113,6 @@ const Sidebar = () => {
     const proceedToGroupDetails = () => {
         setCurrentView('groupDetails');
     };
-
-    const handleBack = () => {
-        setCurrentView('chats');
-        setIsCreatingGroup(false);
-    };
-
     const createGroup = async (details) => {
         try {
             const payload = {

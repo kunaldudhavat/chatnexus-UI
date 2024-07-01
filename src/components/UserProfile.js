@@ -19,7 +19,7 @@ const UserProfile = ({ userId, onClose }) => {
     }, [dispatch, userId]);
 
     useEffect(() => {
-        console.log("Common Groups between users:", commonGroups);  // Debugging: Check common groups
+        console.log("Common Groups between users:", commonGroups);
     }, [commonGroups]);
 
     useEffect(() => {
@@ -37,7 +37,7 @@ const UserProfile = ({ userId, onClose }) => {
 
     const handleGroupClick = (groupId) => {
         dispatch(setCurrentChat(groupId));
-        onClose(); // Close the profile view
+        onClose();
     };
 
     if (!userProfile) {

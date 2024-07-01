@@ -22,7 +22,7 @@ export const setUser = (user) => ({
 
 export const fetchUser = () => async (dispatch) => {
     try {
-        const response = await userApi.getProfile(); // Updated to use userApi
+        const response = await userApi.getProfile();
         dispatch(setUser(response.data));
     } catch (error) {
         console.error('Error fetching user:', error);

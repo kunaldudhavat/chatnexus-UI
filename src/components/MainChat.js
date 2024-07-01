@@ -31,7 +31,7 @@ const MainChat = () => {
 
     const handleSearchClick = () => {
         setIsSearchOpen(true);
-        dispatch(setSearchResults([])); // Reset search results when opening the search sidebar
+        dispatch(setSearchResults([]));
     };
 
     const handleProfileClick = (id) => {

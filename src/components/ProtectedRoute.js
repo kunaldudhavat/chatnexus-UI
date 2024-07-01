@@ -4,7 +4,6 @@ import { Navigate } from 'react-router-dom';
 
 const ProtectedRoute = ({ children }) => {
     const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
-    // console.log('ProtectedRoute: isAuthenticated:', isAuthenticated); // Add this log
     return isAuthenticated ? children : <Navigate to="/signin" />;
 };
 

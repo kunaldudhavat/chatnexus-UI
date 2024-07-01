@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { BiArrowBack } from 'react-icons/bi';
-import { BsEmojiSmile, BsPencil } from 'react-icons/bs';
+import { BsEmojiSmile } from 'react-icons/bs';
 import EmojiPicker from 'emoji-picker-react';
 
 const GroupDetails = ({ onCreateGroup, onBack }) => {
     const [groupName, setGroupName] = useState('');
     const [groupImage, setGroupImage] = useState(null);
-    const [description, setDescription] = useState('');  // Add this line
+    const [description, setDescription] = useState('');
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
     const handleGroupImageChange = (e) => {
@@ -32,7 +32,7 @@ const GroupDetails = ({ onCreateGroup, onBack }) => {
     };
 
     const handleSubmit = () => {
-        onCreateGroup({ name: groupName, image: groupImage, description });  // Modify this line
+        onCreateGroup({ name: groupName, image: groupImage, description });
     };
 
     const onEmojiClick = (emojiObject) => {
