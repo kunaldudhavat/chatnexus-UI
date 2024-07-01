@@ -259,7 +259,15 @@ const Sidebar = () => {
                                                     className="w-full h-full rounded-full object-cover"
                                                 />
                                             ) : result.isGroup ? (
-                                                <FiUsers className="text-2xl text-gray-400" />
+                                                result.chatImage ? (
+                                                    <img
+                                                        src={result.chatImage}
+                                                        alt="Group"
+                                                        className="w-full h-full rounded-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <FiUsers className="text-2xl text-gray-400" />
+                                                )
                                             ) : (
                                                 <FiUser className="text-2xl text-gray-400" />
                                             )}
@@ -317,7 +325,15 @@ const Sidebar = () => {
                                                         className="w-full h-full rounded-full object-cover"
                                                     />
                                                 ) : result.isGroup ? (
-                                                    <FiUsers className="text-2xl text-gray-400" />
+                                                    result.chatImage ? (
+                                                        <img
+                                                            src={result.chatImage}
+                                                            alt="Group"
+                                                            className="w-full h-full rounded-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <FiUsers className="text-2xl text-gray-400" />
+                                                    )
                                                 ) : (
                                                     <FiUser className="text-2xl text-gray-400" />
                                                 )}
@@ -335,7 +351,9 @@ const Sidebar = () => {
                                     const chatName = chat.isGroup
                                         ? chat.chatName
                                         : chat.users.find(user => user.id !== currentUser.id)?.name || 'User';
-                                    const profileImage = chat.isGroup ? null : chat.users.find(user => user.id !== currentUser.id)?.profile?.image;
+                                    const profileImage = chat.isGroup
+                                        ? chat.chatImage
+                                        : chat.users.find(user => user.id !== currentUser.id)?.profile?.image;
                                     return (
                                         <div
                                             key={chat.id}
@@ -347,11 +365,20 @@ const Sidebar = () => {
                                             <div className="flex items-center space-x-3">
                                                 <div className="bg-gray-800 rounded-full h-10 w-10 flex items-center justify-center">
                                                     {chat.isGroup ? (
-                                                        <FiUsers className="text-2xl text-gray-400" />
+                                                        profileImage ? (
+                                                            <img
+                                                                src={profileImage}
+                                                                alt="Group"
+                                                                className="w-full h-full rounded-full object-cover"
+                                                            />
+                                                        ) : (
+                                                            <FiUsers className="text-2xl text-gray-400" />
+                                                        )
                                                     ) : profileImage ? (
                                                         <img
                                                             src={profileImage}
-                                                            alt="Profile" className="w-full h-full rounded-full object-cover"
+                                                            alt="Profile"
+                                                            className="w-full h-full rounded-full object-cover"
                                                         />
                                                     ) : (
                                                         <FiUser className="text-2xl text-gray-400" />

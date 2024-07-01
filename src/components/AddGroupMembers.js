@@ -7,6 +7,7 @@ const AddGroupMembers = ({ onAddMember, onNext, onBack, currentUser }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [selectedUsers, setSelectedUsers] = useState([]);
+    const [groupDescription, setGroupDescription] = useState('');
 
     const handleSearchChange = async (e) => {
         const query = e.target.value;
@@ -15,10 +16,19 @@ const AddGroupMembers = ({ onAddMember, onNext, onBack, currentUser }) => {
         if (query.length > 0) {
             try {
                 const response = await userApi.searchUsers(query);
-                const filteredResults = response.data.filter(user => user.id !== currentUser.id && !user.group);
-                setSearchResults(filteredResults);
+                console.log('Search response:', response); // Log the entire response
+
+                // Check if the response contains the data property and is an array
+                if (response && Array.isArray(response)) {
+                    const filteredResults = response.filter(user => user.id !== currentUser.id && !user.group);
+                    setSearchResults(filteredResults);
+                } else {
+                    console.error('Unexpected response format:', response);
+                    setSearchResults([]);
+                }
             } catch (error) {
                 console.error('Error searching users:', error);
+                setSearchResults([]);
             }
         } else {
             setSearchResults([]);
@@ -36,6 +46,10 @@ const AddGroupMembers = ({ onAddMember, onNext, onBack, currentUser }) => {
 
     const handleUserRemove = (userId) => {
         setSelectedUsers(selectedUsers.filter(user => user.id !== userId));
+    };
+
+    const handleNext = () => {
+        onNext(groupDescription);
     };
 
     return (
@@ -88,7 +102,7 @@ const AddGroupMembers = ({ onAddMember, onNext, onBack, currentUser }) => {
                 {selectedUsers.length > 0 && (
                     <button
                         className="w-full bg-green-600 text-white rounded-full p-2"
-                        onClick={onNext}
+                        onClick={handleNext}
                     >
                         Next
                     </button>

@@ -51,7 +51,7 @@ const UserProfile = ({ userId, onClose }) => {
     }
 
     return (
-        <div ref={profileRef} className="p-4 bg-gray-900 text-white h-full">
+        <div ref={profileRef} className="p-4 bg-gray-900 text-white h-full max-h-screen overflow-y-auto">
             <div className="flex items-center mb-4">
                 <button onClick={onClose} className="text-lg font-bold">
                     <BsArrowLeft />

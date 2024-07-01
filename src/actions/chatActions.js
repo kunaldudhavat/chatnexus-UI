@@ -5,6 +5,7 @@ export const SET_CHATS = 'SET_CHATS';
 export const ADD_CHAT = 'ADD_CHAT';
 export const SET_CURRENT_CHAT = 'SET_CURRENT_CHAT';
 export const UPDATE_CHAT_LATEST_MESSAGE = 'UPDATE_CHAT_LATEST_MESSAGE';
+export const UPDATE_CHAT = 'UPDATE_CHAT';
 
 export const fetchChats = () => async (dispatch, getState) => {
     try {
@@ -21,16 +22,14 @@ export const fetchChats = () => async (dispatch, getState) => {
             return;
         }
 
-        const chatsWithLatestMessages = response.data.map(chat => {
-            const latestMessage = chat.messages && chat.messages.length > 0 ? chat.messages[chat.messages.length - 1] : null;
-            console.log('Processing chat:', chat);
-            return {
-                ...chat,
-                isGroup: chat.group,
-                chatName: chat.group ? (chat.chatName || 'Unnamed Group') : chat.users.find(user => user.id !== currentUser.id)?.name || 'User',
-                latestMessage: latestMessage ? { ...latestMessage, timestamp: new Date(latestMessage.timestamp) } : null
-            };
-        });
+        const chatsWithLatestMessages = response.data.map(chat => ({
+            ...chat,
+            isGroup: chat.group,
+            chatName: chat.group ? (chat.chatName || 'Unnamed Group') : chat.users.find(user => user.id !== currentUser.id)?.name || 'User',
+            latestMessage: chat.messages && chat.messages.length > 0
+                ? { ...chat.messages[chat.messages.length - 1], timestamp: new Date(chat.messages[chat.messages.length - 1].timestamp) }
+                : null
+        }));
 
         dispatch({ type: SET_CHATS, payload: chatsWithLatestMessages });
         return chatsWithLatestMessages;
@@ -44,7 +43,7 @@ export const fetchChats = () => async (dispatch, getState) => {
 export const createChat = (userId) => async (dispatch) => {
     try {
         const response = await chatApi.createChat(userId);
-        const newChat = { ...response.data, latestMessage: null, isGroupChat: false };
+        const newChat = { ...response.data, latestMessage: null, isGroup: false };
         dispatch({ type: ADD_CHAT, payload: newChat });
         dispatch({ type: SET_CURRENT_CHAT, payload: newChat });
         return newChat;
@@ -55,14 +54,32 @@ export const createChat = (userId) => async (dispatch) => {
     }
 };
 
-export const createGroupChat = (groupData) => async (dispatch) => {
+export const createGroupChat = (groupData) => async (dispatch, getState) => {
     try {
-        const response = await chatApi.createGroupChat(groupData);
+        const currentUser = getState().auth.user;
+        if (!currentUser) {
+            throw new Error('Current user not found');
+        }
+
+        // Ensure the current user is included in the group
+        const userIds = new Set([...groupData.userIds, currentUser.id]);
+
+        const payload = {
+            ...groupData,
+            userIds: Array.from(userIds)
+        };
+
+        const response = await chatApi.createGroupChat(payload);
         const newGroupChat = {
             ...response.data,
             latestMessage: null,
-            isGroupChat: true,
-            chatName: groupData.chatName || response.data.chatName || 'Unnamed Group'
+            isGroup: true,
+            chatName: groupData.chatName || response.data.chatName || 'Unnamed Group',
+            chatImage: groupData.chatImage || response.data.chatImage,
+            users: [
+                currentUser,
+                ...response.data.users.filter(user => user.id !== currentUser.id)
+            ]
         };
         dispatch({ type: ADD_CHAT, payload: newGroupChat });
         dispatch({ type: SET_CURRENT_CHAT, payload: newGroupChat });
@@ -94,4 +111,9 @@ export const setCurrentChat = (chatId) => async (dispatch, getState) => {
 export const updateChatLatestMessage = (chatId, message) => ({
     type: UPDATE_CHAT_LATEST_MESSAGE,
     payload: { chatId, message }
+});
+
+export const updateChat = (chatId, updatedData) => ({
+    type: UPDATE_CHAT,
+    payload: { chatId, updatedData }
 });

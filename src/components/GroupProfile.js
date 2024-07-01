@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchGroupProfile, updateGroupProfile } from '../actions/groupActions';
 import { BsArrowLeft, BsPencil, BsCheck } from 'react-icons/bs';
-import { FiUsers, FiUser } from 'react-icons/fi';
+import {FiUser, FiUsers} from 'react-icons/fi';
 import EmojiPicker from 'emoji-picker-react';
 
 const GroupProfile = ({ groupId, onClose, onUserProfileClick }) => {
@@ -90,7 +90,7 @@ const GroupProfile = ({ groupId, onClose, onUserProfileClick }) => {
     }
 
     return (
-        <div ref={profileRef} className="p-4 bg-gray-900 text-white h-full">
+        <div ref={profileRef} className="p-4 bg-gray-900 text-white h-full max-h-screen overflow-y-auto">
             <div className="flex items-center mb-4">
                 <button onClick={onClose} className="text-lg font-bold mr-2">
                     <BsArrowLeft />
