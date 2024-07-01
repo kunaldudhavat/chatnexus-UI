@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setSearchResults } from '../actions/searchActions';
 import { CgClose } from "react-icons/cg";
@@ -25,11 +25,11 @@ const SearchSidebar = ({ onClose }) => {
         }
     };
 
-    const handleClickOutside = (event) => {
+    const handleClickOutside = useCallback((event) => {
         if (sidebarRef.current && !sidebarRef.current.contains(event.target) && !searchInputRef.current.contains(event.target)) {
             onClose();
         }
-    };
+    }, [onClose]);
 
     useEffect(() => {
         document.addEventListener('mousedown', handleClickOutside);
