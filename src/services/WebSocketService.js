@@ -1,6 +1,8 @@
 import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
 
+const api_url = process.env.REACT_APP_API_URL;
+
 class WebSocketService {
     constructor() {
         this.stompClient = null;
@@ -8,7 +10,7 @@ class WebSocketService {
     }
 
     connect(onConnected) {
-        const socket = new SockJS('https://18.217.150.211:8443/ws');
+        const socket = new SockJS(`${api_url}/ws`);
         this.stompClient = Stomp.over(socket);
 
         this.stompClient.connect({}, () => {

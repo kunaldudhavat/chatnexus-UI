@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
+const api_url = process.env.REACT_APP_API_URL;
+
 const ResetPasswordModal = ({ closeModal, token }) => {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -46,7 +48,7 @@ const ResetPasswordModal = ({ closeModal, token }) => {
         }
 
         try {
-            const response = await axios.post('https://18.217.150.211:8443/auth/reset-password', {
+            const response = await axios.post(`${api_url}/auth/reset-password`, {
                 token,
                 password
             });
