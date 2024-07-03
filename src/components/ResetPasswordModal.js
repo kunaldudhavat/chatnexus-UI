@@ -46,7 +46,7 @@ const ResetPasswordModal = ({ closeModal, token }) => {
         }
 
         try {
-            const response = await axios.post('http://localhost:8080/auth/reset-password', {
+            const response = await axios.post('http://18.217.150.211:8080/auth/reset-password', {
                 token,
                 password
             });
