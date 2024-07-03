@@ -32,8 +32,10 @@ export const fetchUser = () => async (dispatch) => {
 export const signIn = (data) => async (dispatch) => {
     try {
         const response = await authApi.signIn(data);
-        localStorage.setItem('token', response.data.token);
-        dispatch(loginSuccess(response.data.token));
+        const token = response.data.jwt;
+        console.log('Token:', token);
+        localStorage.setItem('token', token);
+        dispatch(loginSuccess(token));
         dispatch(fetchUser());
     } catch (error) {
         dispatch({ type: SIGN_IN_FAIL, payload: error.response.data });
@@ -43,8 +45,10 @@ export const signIn = (data) => async (dispatch) => {
 export const signUp = (data) => async (dispatch) => {
     try {
         const response = await authApi.signUp(data);
-        localStorage.setItem('token', response.data.token);
-        dispatch({ type: SIGN_UP_SUCCESS, payload: response.data.token });
+        const token = response.data.jwt;
+        console.log('Token:', token);
+        localStorage.setItem('token', token);
+        dispatch({ type: SIGN_UP_SUCCESS, payload: token });
         dispatch(fetchUser());
     } catch (error) {
         dispatch({ type: SIGN_UP_FAIL, payload: error.response.data });
