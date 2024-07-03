@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const API_URL = 'http://18.217.150.211:8080';
+export const API_URL = 'https://18.217.150.211:8443';
 
 const getToken = () => {
     return localStorage.getItem('token');

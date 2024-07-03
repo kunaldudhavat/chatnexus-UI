@@ -8,7 +8,7 @@ class WebSocketService {
     }
 
     connect(onConnected) {
-        const socket = new SockJS('http://18.217.150.211:8080/ws');
+        const socket = new SockJS('https://18.217.150.211:8443/ws');
         this.stompClient = Stomp.over(socket);
 
         this.stompClient.connect({}, () => {
